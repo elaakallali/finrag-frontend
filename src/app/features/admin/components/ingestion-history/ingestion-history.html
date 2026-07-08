@@ -1,0 +1,98 @@
+<div class="history-card">
+  <div class="history-card__toolbar">
+    <p class="history-card__title">Historique des ingestions</p>
+
+    <span class="history-card__search p-input-icon-left">
+      <i class="pi pi-search"></i>
+      <input
+        type="text"
+        pInputText
+        placeholder="Rechercher un document, un type, une méthode..."
+        (input)="onSearchInput($any($event.target).value)"
+      />
+    </span>
+  </div>
+
+  @if (errorMessage()) {
+    <p class="history-card__error">{{ errorMessage() }}</p>
+  }
+
+  <p-table
+    [value]="documents()"
+    styleClass="history-table"
+    [rowHover]="true"
+    [lazy]="true"
+    [paginator]="true"
+    [rows]="pageSize()"
+    [totalRecords]="totalElements()"
+    [showCurrentPageReport]="true"
+    currentPageReportTemplate="{first} - {last} sur {totalRecords}"
+    (onLazyLoad)="onLazyLoad($event)"
+  >
+    <ng-template #header>
+      <tr>
+        <th (click)="toggleSort('documentName')" class="history-table__sortable">
+          Document <i [class]="sortIcon('documentName')"></i>
+        </th>
+        <th (click)="toggleSort('regulationType')" class="history-table__sortable">
+          Type réglementaire <i [class]="sortIcon('regulationType')"></i>
+        </th>
+        <th (click)="toggleSort('strategy')" class="history-table__sortable">
+          Méthode de chunking <i [class]="sortIcon('strategy')"></i>
+        </th>
+        <th (click)="toggleSort('chunkCount')" class="history-table__sortable">
+          Chunks <i [class]="sortIcon('chunkCount')"></i>
+        </th>
+        <th (click)="toggleSort('success')" class="history-table__sortable">
+          Statut <i [class]="sortIcon('success')"></i>
+        </th>
+        <th (click)="toggleSort('createdAt')" class="history-table__sortable">
+          Indexé le <i [class]="sortIcon('createdAt')"></i>
+        </th>
+        <th>Actions</th>
+      </tr>
+    </ng-template>
+
+    <ng-template #body let-doc>
+      <tr>
+        <td class="history-table__doc">
+          <i class="pi pi-file"></i>
+          <span>{{ doc.fileName }}</span>
+        </td>
+        <td>{{ doc.regulationType }}</td>
+        <td>{{ doc.strategy }}</td>
+        <td>{{ doc.chunkCount ?? '—' }}</td>
+        <td>
+          <p-tag [value]="statusLabel(doc.status)" [severity]="statusSeverity(doc.status)" />
+        </td>
+        <td>{{ doc.indexedAt ? (doc.indexedAt | date: 'dd/MM/yyyy HH:mm') : '—' }}</td>
+        <td class="history-table__actions">
+          <p-button
+            icon="pi pi-eye"
+            [text]="true"
+            [rounded]="true"
+            severity="secondary"
+            [disabled]="doc.status !== 'DONE'"
+            pTooltip="Voir le PDF"
+            (onClick)="viewPdf(doc)"
+          />
+          <p-button
+            icon="pi pi-trash"
+            [text]="true"
+            [rounded]="true"
+            severity="danger"
+            [loading]="deletingId() === doc.id"
+            pTooltip="Supprimer"
+            (onClick)="deleteDocument(doc)"
+          />
+        </td>
+      </tr>
+    </ng-template>
+
+    <ng-template #emptymessage>
+      <tr>
+        <td colspan="7" class="history-table__empty">Aucun document ingéré pour le moment.</td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>

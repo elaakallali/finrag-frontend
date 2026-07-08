@@ -1,0 +1,113 @@
+<div class="upload-card">
+  <p class="upload-card__title">Uploader un document</p>
+
+  <p-fileupload
+    #fileUpload
+    mode="advanced"
+    name="file"
+    accept=".pdf,.docx"
+    [multiple]="false"
+    [maxFileSize]="104857600"
+    [customUpload]="true"
+    [showUploadButton]="false"
+    [showCancelButton]="false"
+    chooseLabel="Parcourir"
+    (onSelect)="onFileSelect($event)"
+    (onRemove)="onFileRemove()"
+    (onClear)="onFileRemove()"
+  >
+    <ng-template #toolbar></ng-template>
+
+    <ng-template #empty>
+      <div class="dropzone" (click)="fileUpload.choose()">
+        <div class="dropzone__icon">
+          <i class="pi pi-cloud-upload"></i>
+        </div>
+        <p class="dropzone__text">Glissez vos fichiers ici ou cliquez pour parcourir</p>
+        <p class="dropzone__hint">PDF, DOCX jusqu'à 100 Mo</p>
+      </div>
+    </ng-template>
+
+    <ng-template #file let-file let-removeFileCallback="removeFileCallback" let-index="index">
+      <div class="selected-file">
+        <i class="pi pi-file"></i>
+        <span class="selected-file__name">{{ file.name }}</span>
+        <button
+          type="button"
+          class="selected-file__remove"
+          (click)="removeFileCallback($event, index)"
+          aria-label="Retirer le fichier"
+        >
+          <i class="pi pi-times"></i>
+        </button>
+      </div>
+    </ng-template>
+  </p-fileupload>
+
+  <div class="upload-card__controls">
+    <p-select
+      [options]="regulationTypes"
+      [ngModel]="regulationType()"
+      (ngModelChange)="regulationType.set($event)"
+      placeholder="Type réglementaire"
+      styleClass="brand-select"
+    />
+
+    <p-select
+      [options]="strategies"
+      [ngModel]="strategy()"
+      (ngModelChange)="strategy.set($event)"
+      placeholder="Stratégie de chunking"
+      styleClass="brand-select"
+    />
+
+    <p-button
+      label="Lancer l'ingestion"
+      icon="pi pi-upload"
+      styleClass="brand-button"
+      [disabled]="!selectedFile() || isUploading()"
+      [loading]="isUploading()"
+      (click)="submit()"
+    />
+  </div>
+
+  @if (jobStatus(); as status) {
+    <div class="progress">
+      <p class="progress__title">
+        {{ isUploading() ? 'Ingestion en cours' : (status.failed ? 'Ingestion échouée' : 'Ingestion terminée') }}
+      </p>
+      <p class="progress__subtitle">{{ status.documentName }}</p>
+      <p class="progress__job-id">Job ID : {{ status.jobId }}</p>
+
+      <ol class="progress-steps">
+        @for (step of steps; track step.key) {
+          <li class="progress-step" [class]="'progress-step--' + stepState(step.key)">
+            <span class="progress-step__badge">
+              @switch (stepState(step.key)) {
+                @case ('done') {
+                  <i class="pi pi-check"></i>
+                }
+                @case ('failed') {
+                  <i class="pi pi-times"></i>
+                }
+                @default {
+                  {{ $index + 1 }}
+                }
+              }
+            </span>
+            <span class="progress-step__text">
+              <span class="progress-step__label">{{ step.label }}</span>
+              <span class="progress-step__desc">
+                {{ stepState(step.key) === 'failed' && status.errorMessage ? status.errorMessage : step.description }}
+              </span>
+            </span>
+          </li>
+        }
+      </ol>
+    </div>
+  }
+
+  @if (errorMessage() && !jobStatus()) {
+    <p class="upload-card__error">{{ errorMessage() }}</p>
+  }
+</div>

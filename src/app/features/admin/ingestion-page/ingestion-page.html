@@ -1,0 +1,89 @@
+<div class="shell">
+  <aside class="sidebar">
+    <div class="sidebar__logo">
+      <div class="sidebar__logo-icon">FR</div>
+      <div>
+        <p class="sidebar__logo-title">FinRAG</p>
+        <p class="sidebar__logo-subtitle">Espace admin</p>
+      </div>
+    </div>
+
+    <nav class="sidebar__nav">
+      <div class="sidebar__nav-item">
+        <i class="pi pi-th-large"></i>
+        Tableau de bord
+      </div>
+      <div class="sidebar__nav-item sidebar__nav-item--active">
+        <i class="pi pi-cloud-upload"></i>
+        Ingestion
+      </div>
+      <div class="sidebar__nav-item">
+        <i class="pi pi-copy"></i>
+        Documents
+      </div>
+      <div class="sidebar__nav-item">
+        <i class="pi pi-users"></i>
+        Utilisateurs
+      </div>
+      <div class="sidebar__nav-item">
+        <i class="pi pi-cog"></i>
+        Paramètres
+      </div>
+    </nav>
+
+    <div class="sidebar__logout">
+      <i class="pi pi-sign-out"></i>
+      Déconnexion
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div>
+        <p class="topbar__breadcrumb">Administration</p>
+        <p class="topbar__title">Ingestion des documents réglementaires</p>
+      </div>
+      <div class="topbar__actions">
+        <div class="topbar__search">
+          <i class="pi pi-search"></i>
+          <span>Rechercher...</span>
+        </div>
+        <div class="topbar__bell">
+          <i class="pi pi-bell"></i>
+          <span class="topbar__bell-dot"></span>
+        </div>
+        <div class="topbar__avatar">MF</div>
+      </div>
+    </header>
+
+    <div class="content">
+      <section class="hero">
+        <div>
+          <h1 class="hero__title">Ingérez vos textes réglementaires</h1>
+          <p class="hero__subtitle">
+            MiFID II, CRR, IFRS, PCG — indexés automatiquement dans fin-regulation avec suivi en temps réel.
+          </p>
+        </div>
+        <div class="hero__icons">
+          <div class="hero__icon hero__icon--teal"><i class="pi pi-file"></i></div>
+          <div class="hero__icon hero__icon--coral"><i class="pi pi-shield"></i></div>
+          <div class="hero__icon hero__icon--pink"><i class="pi pi-database"></i></div>
+        </div>
+      </section>
+
+      <app-upload-panel (uploadCompleted)="refreshHistory()" (uploadFailed)="refreshHistory()" />
+
+      <app-ingestion-history
+        [documents]="documents()"
+        [sortField]="sortField()"
+        [sortDirection]="sortDirection()"
+        [totalElements]="totalElements()"
+        [pageSize]="pageSize()"
+        (documentDeleted)="refreshHistory()"
+        (searchChanged)="onSearchChanged($event)"
+        (sortChanged)="onSortChanged($event)"
+        (pageChanged)="onPageChanged($event)"
+      />
+    </div>
+  </div>
+</div>
