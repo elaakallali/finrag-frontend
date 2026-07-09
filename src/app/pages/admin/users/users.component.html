@@ -1,0 +1,189 @@
+<div class="users-page">
+  <section class="users-card">
+    <div class="card-header">
+      <div class="card-heading">
+        <h2>User management</h2>
+        <span class="card-subtitle">Manage access and roles</span>
+      </div>
+      <p-button
+        label="Add user"
+        icon="pi pi-user-plus"
+        styleClass="btn-navy"
+        (onClick)="openAddUserDialog()"
+      />
+    </div>
+
+    <div class="stats-grid">
+      <article class="stat-card">
+        <div class="stat-icon stat-icon-blue">
+          <i class="pi pi-users"></i>
+        </div>
+        <div class="stat-copy">
+          <span class="stat-value">{{ stats().total }}</span>
+          <span class="stat-label">Total users</span>
+        </div>
+      </article>
+
+      <article class="stat-card">
+        <div class="stat-icon stat-icon-green">
+          <i class="pi pi-check-circle"></i>
+        </div>
+        <div class="stat-copy">
+          <span class="stat-value">{{ stats().active }}</span>
+          <span class="stat-label">Active Users</span>
+        </div>
+      </article>
+
+      <article class="stat-card">
+        <div class="stat-icon stat-icon-teal">
+          <i class="pi pi-shield"></i>
+        </div>
+        <div class="stat-copy">
+          <span class="stat-value">{{ stats().admins }}</span>
+          <span class="stat-label">Administrators</span>
+        </div>
+      </article>
+    </div>
+
+    <div class="card-toolbar">
+      <p-iconfield iconPosition="left" class="toolbar-search">
+        <p-inputicon styleClass="pi pi-search" />
+        <input
+          type="text"
+          pInputText
+          placeholder="Search users"
+          (input)="onSearch($any($event.target).value)"
+        />
+      </p-iconfield>
+
+      <p-select
+        [options]="roleFilters"
+        [(ngModel)]="roleFilter"
+        optionLabel="label"
+        optionValue="value"
+        styleClass="filter-select"
+      />
+
+      <p-select
+        [options]="statusFilters"
+        [(ngModel)]="statusFilter"
+        optionLabel="label"
+        optionValue="value"
+        styleClass="filter-select"
+      />
+    </div>
+
+    <p-table [value]="filteredUsers()" [paginator]="false" styleClass="users-table">
+      <ng-template pTemplate="header">
+        <tr>
+          <th>NAME / EMAIL</th>
+          <th>ROLE</th>
+          <th>STATUS</th>
+          <th>LAST LOGIN</th>
+          <th>ACTIONS</th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-user>
+        <tr>
+          <td>
+            <div class="user-cell">
+              <div class="user-avatar">{{ user.initials }}</div>
+              <div class="user-copy">
+                <span class="user-name">{{ user.name }}</span>
+                <span class="user-email">{{ user.email }}</span>
+              </div>
+            </div>
+          </td>
+          <td>
+            <span class="role-tag role-{{ user.role }}">{{ roleLabel(user.role) }}</span>
+          </td>
+          <td>
+            <span class="status status-{{ user.status }}">
+              <span class="status-dot"></span>
+              {{ statusLabel(user.status) }}
+            </span>
+          </td>
+          <td class="col-muted">{{ user.lastLogin }}</td>
+          <td>
+            <div class="row-actions">
+              <p-button icon="pi pi-pencil" [text]="true" [rounded]="true" severity="secondary" />
+              <p-button icon="pi pi-trash" [text]="true" [rounded]="true" severity="danger" />
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </section>
+</div>
+
+<p-dialog
+  header="Add user"
+  [visible]="showAddUserDialog()"
+  (visibleChange)="onDialogVisibilityChange($event)"
+  [modal]="true"
+  [draggable]="false"
+  [resizable]="false"
+  styleClass="add-user-dialog"
+>
+  <p class="dialog-subtitle">Create a new account and assign a role.</p>
+
+  @if (formError(); as error) {
+    <p class="form-error">{{ error }}</p>
+  }
+
+  <div class="form-field">
+    <label for="user-name">FULL NAME *</label>
+    <input
+      id="user-name"
+      type="text"
+      pInputText
+      [(ngModel)]="newUserName"
+      placeholder="e.g. John Doe"
+      class="form-input"
+    />
+  </div>
+
+  <div class="form-field">
+    <label for="user-email">EMAIL *</label>
+    <input
+      id="user-email"
+      type="email"
+      pInputText
+      [(ngModel)]="newUserEmail"
+      placeholder="e.g. john.doe@talan.com"
+      class="form-input"
+    />
+  </div>
+
+  <div class="form-row">
+    <div class="form-field">
+      <label for="user-role">ROLE</label>
+      <p-select
+        inputId="user-role"
+        [options]="roleOptions"
+        [(ngModel)]="newUserRole"
+        optionLabel="label"
+        optionValue="value"
+        styleClass="form-select"
+      />
+    </div>
+
+    <div class="form-field">
+      <label for="user-status">STATUS</label>
+      <p-select
+        inputId="user-status"
+        [options]="statusOptions"
+        [(ngModel)]="newUserStatus"
+        optionLabel="label"
+        optionValue="value"
+        styleClass="form-select"
+      />
+    </div>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <p-button label="Cancel" severity="secondary" [text]="true" (onClick)="closeAddUserDialog()" />
+    <p-button label="Add user" icon="pi pi-user-plus" styleClass="btn-navy" (onClick)="submitAddUser()" />
+  </ng-template>
+</p-dialog>

@@ -1,0 +1,117 @@
+<div class="dashboard-page">
+  <header class="page-topbar">
+    <h1 class="topbar-title">Dashboard</h1>
+    <div class="topbar-actions">
+      <p-iconfield iconPosition="left" class="topbar-search">
+        <p-inputicon styleClass="pi pi-search" />
+        <input type="text" pInputText placeholder="Search documents, queries..." />
+      </p-iconfield>
+      <p-button label="Upload" icon="pi pi-upload" styleClass="btn-navy" routerLink="/admin/document-upload" />
+      <div class="topbar-avatar">DA</div>
+    </div>
+  </header>
+
+  <section class="overview-card">
+    <div class="overview-header">
+      <span class="last-updated">Last updated: {{ lastUpdated }}</span>
+      <p-select
+        [options]="periodOptions"
+        [(ngModel)]="selectedPeriod"
+        optionLabel="label"
+        optionValue="value"
+        styleClass="period-select"
+      />
+    </div>
+
+    <div class="metrics-grid">
+      @for (metric of metrics; track metric.label) {
+        <article class="metric-card">
+          <div class="metric-icon" [class]="metric.iconClass">
+            <i [class]="metric.icon"></i>
+          </div>
+          <div class="metric-copy">
+            <span class="metric-label">{{ metric.label }}</span>
+            <span class="metric-value">{{ metric.value }}</span>
+            <span
+              class="metric-trend"
+              [class.trend-up]="metric.trendType === 'up'"
+              [class.trend-sync]="metric.trendType === 'sync'"
+              [class.trend-file]="metric.trendType === 'file'"
+            >
+              {{ metric.trend }}
+            </span>
+          </div>
+        </article>
+      }
+    </div>
+  </section>
+
+  <section class="charts-grid">
+    <article class="panel-card chart-panel">
+      <div class="panel-header">
+        <div>
+          <h2>Documents uploaded per month</h2>
+          <p>6-month trend by type</p>
+        </div>
+        <span class="panel-year">2026</span>
+      </div>
+      @if (chartsReady && uploadsChartData && uploadsChartOptions) {
+        <div class="chart-wrap bar-chart-wrap">
+          <p-chart type="bar" [data]="uploadsChartData" [options]="uploadsChartOptions" />
+        </div>
+      }
+    </article>
+
+    <article class="panel-card chart-panel">
+      <div class="panel-header">
+        <div>
+          <h2>Document types</h2>
+          <p>Distribution</p>
+        </div>
+      </div>
+      <div class="donut-layout">
+        @if (chartsReady && typesChartData && typesChartOptions) {
+          <div class="chart-wrap donut-chart-wrap">
+            <p-chart type="doughnut" [data]="typesChartData" [options]="typesChartOptions" />
+            <div class="donut-center">
+              <span class="donut-percent">63%</span>
+              <span class="donut-label">Reports</span>
+            </div>
+          </div>
+        }
+        <div class="donut-legend">
+          <div class="legend-item">
+            <span class="legend-dot legend-navy"></span>
+            <span>Reports</span>
+            <strong>784</strong>
+          </div>
+          <div class="legend-item">
+            <span class="legend-dot legend-teal"></span>
+            <span>Regulations</span>
+            <strong>464</strong>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <article class="panel-card activity-panel">
+      <div class="panel-header">
+        <div>
+          <h2>Ingestion activity</h2>
+          <p>Recent pipeline events</p>
+        </div>
+      </div>
+      <ul class="activity-list">
+        @for (item of activities; track item.title) {
+          <li class="activity-item">
+            <span class="activity-dot tone-{{ item.tone }}"></span>
+            <div class="activity-copy">
+              <span class="activity-title">{{ item.title }} <em>{{ item.status }}</em></span>
+              <span class="activity-time">{{ item.time }}</span>
+            </div>
+          </li>
+        }
+      </ul>
+    </article>
+  </section>
+</div>

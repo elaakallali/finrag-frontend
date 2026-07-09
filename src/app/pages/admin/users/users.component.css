@@ -1,0 +1,377 @@
+:host {
+  display: block;
+  font-family: "Inter", "Segoe UI", Arial, sans-serif;
+  color: #172033;
+}
+
+.users-page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.page-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 22px;
+  background: #ffffff;
+  border: 1px solid #eef1f6;
+  border-radius: 12px;
+  box-shadow: 0 1px 2px rgba(23, 32, 51, 0.04);
+}
+
+.topbar-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.topbar-search input {
+  width: 260px;
+  border-radius: 999px;
+  background: #f4f7fb;
+}
+
+.topbar-avatar {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: #f4f7fb;
+  color: #243f95;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.users-card {
+  background: #ffffff;
+  border: 1px solid #eef1f6;
+  border-radius: 14px;
+  padding: 22px 24px 18px;
+  box-shadow: 0 1px 2px rgba(23, 32, 51, 0.04);
+}
+
+.card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.card-heading h2 {
+  margin: 0 0 4px;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.card-subtitle {
+  color: #8a94a6;
+  font-size: 13px;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.stat-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 18px;
+  border: 1px solid #eef1f6;
+  border-radius: 12px;
+  background: #fafbfd;
+}
+
+.stat-icon {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  font-size: 18px;
+}
+
+.stat-icon-blue {
+  background: #e8eefb;
+  color: #3559d6;
+}
+
+.stat-icon-green {
+  background: #e7f7ef;
+  color: #1f9d6b;
+}
+
+.stat-icon-teal {
+  background: #e4f8f5;
+  color: #1bb5a3;
+}
+
+.stat-copy {
+  display: grid;
+  gap: 2px;
+}
+
+.stat-value {
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.stat-label {
+  color: #8a94a6;
+  font-size: 12px;
+}
+
+.card-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.toolbar-search {
+  flex: 1;
+}
+
+.toolbar-search input {
+  width: 100%;
+  border-radius: 8px;
+  background: #f9fafc;
+}
+
+:host ::ng-deep .filter-select {
+  min-width: 150px;
+}
+
+:host ::ng-deep .filter-select .p-select {
+  width: 100%;
+  border-radius: 8px;
+}
+
+:host ::ng-deep .btn-navy.p-button {
+  background: #243f95;
+  border-color: #243f95;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+:host ::ng-deep .btn-navy.p-button:hover {
+  background: #1d3279;
+  border-color: #1d3279;
+}
+
+:host ::ng-deep .users-table table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+:host ::ng-deep .users-table .p-datatable-thead > tr > th {
+  background: #f7f9fc;
+  color: #98a1b3;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.6px;
+  border: none;
+  padding: 12px 16px;
+}
+
+:host ::ng-deep .users-table .p-datatable-tbody > tr > td {
+  border: none;
+  border-bottom: 1px solid #f0f2f7;
+  padding: 14px 16px;
+  font-size: 14px;
+}
+
+:host ::ng-deep .users-table .p-datatable-tbody > tr:hover {
+  background: #fafbfe;
+}
+
+.user-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.user-avatar {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: #e8eefb;
+  color: #3559d6;
+  font-size: 11px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.user-copy {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.user-name {
+  font-weight: 600;
+  color: #172033;
+}
+
+.user-email {
+  color: #8a94a6;
+  font-size: 12px;
+}
+
+.role-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.role-admin {
+  background: #e8eefb;
+  color: #3559d6;
+}
+
+.role-user {
+  background: #edf4ff;
+  color: #5b7fd6;
+}
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+}
+
+.status-active {
+  color: #1f9d6b;
+}
+
+.status-active .status-dot {
+  background: #21c17a;
+}
+
+.status-inactive {
+  color: #c08a1e;
+}
+
+.status-inactive .status-dot {
+  background: #f0b429;
+}
+
+.col-muted {
+  color: #6b7488;
+}
+
+.row-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.dialog-subtitle {
+  margin: 0 0 18px;
+  color: #8a94a6;
+  font-size: 13px;
+}
+
+.form-error {
+  margin: 0 0 16px;
+  color: #d64545;
+  font-size: 13px;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.form-field label {
+  color: #98a1b3;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.6px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.form-input {
+  width: 100%;
+}
+
+:host ::ng-deep .form-select {
+  width: 100%;
+}
+
+:host ::ng-deep .form-select .p-select {
+  width: 100%;
+  border-radius: 8px;
+}
+
+:host ::ng-deep .form-input.p-inputtext {
+  border-radius: 8px;
+  background: #f9fafc;
+}
+
+:host ::ng-deep .add-user-dialog {
+  width: min(480px, 92vw);
+}
+
+:host ::ng-deep .add-user-dialog .p-dialog-header {
+  padding-bottom: 0;
+}
+
+:host ::ng-deep .add-user-dialog .p-dialog-content {
+  padding-top: 8px;
+}
+
+:host ::ng-deep .add-user-dialog .p-dialog-footer {
+  gap: 8px;
+}
+
+@media (max-width: 900px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .card-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .topbar-search input {
+    width: 160px;
+  }
+}

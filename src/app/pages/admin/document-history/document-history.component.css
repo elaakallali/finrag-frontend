@@ -1,0 +1,313 @@
+:host {
+  display: block;
+  font-family: "Inter", "Segoe UI", Arial, sans-serif;
+  color: #172033;
+}
+
+.documents-page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.delete-error {
+  margin: 0;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: #fdecec;
+  color: #d64545;
+  font-size: 13px;
+}
+
+/* ===== Top bar ===== */
+.page-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 22px;
+  background: #ffffff;
+  border: 1px solid #eef1f6;
+  border-radius: 12px;
+  box-shadow: 0 1px 2px rgba(23, 32, 51, 0.04);
+}
+
+.topbar-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.topbar-search input {
+  width: 260px;
+  border-radius: 999px;
+  background: #f4f7fb;
+}
+
+.topbar-avatar {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: #f4f7fb;
+  color: #243f95;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+/* ===== Card ===== */
+.documents-card {
+  background: #ffffff;
+  border: 1px solid #eef1f6;
+  border-radius: 14px;
+  padding: 22px 24px 18px;
+  box-shadow: 0 1px 2px rgba(23, 32, 51, 0.04);
+}
+
+.card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.card-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.form-error,
+.loading-message,
+.empty-message {
+  margin: 0 0 16px;
+  font-size: 13px;
+}
+
+.form-error {
+  color: #d64545;
+}
+
+.loading-message,
+.empty-message {
+  color: #8a94a6;
+}
+
+.card-heading h2 {
+  margin: 0 0 4px;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.card-subtitle {
+  color: #8a94a6;
+  font-size: 13px;
+}
+
+/* ===== Toolbar ===== */
+.card-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.toolbar-search {
+  flex: 1;
+}
+
+.toolbar-search input {
+  width: 100%;
+  border-radius: 8px;
+  background: #f9fafc;
+}
+
+/* ===== Navy primary buttons ===== */
+:host ::ng-deep .btn-navy.p-button {
+  background: #243f95;
+  border-color: #243f95;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+:host ::ng-deep .btn-navy.p-button:hover {
+  background: #1d3279;
+  border-color: #1d3279;
+}
+
+/* ===== Table ===== */
+:host ::ng-deep .documents-table table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+:host ::ng-deep .documents-table .p-datatable-thead > tr > th {
+  background: #f7f9fc;
+  color: #98a1b3;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.6px;
+  border: none;
+  padding: 12px 16px;
+}
+
+:host ::ng-deep .documents-table .p-datatable-tbody > tr > td {
+  border: none;
+  border-bottom: 1px solid #f0f2f7;
+  padding: 14px 16px;
+  font-size: 14px;
+}
+
+:host ::ng-deep .documents-table .p-datatable-tbody > tr:hover {
+  background: #fafbfe;
+}
+
+.col-name {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 500;
+  color: #243f95;
+}
+
+.col-name i {
+  color: #e15b5b;
+  font-size: 15px;
+}
+
+.doc-name-link {
+  border: none;
+  background: none;
+  padding: 0;
+  font: inherit;
+  font-weight: 500;
+  color: #243f95;
+  cursor: pointer;
+  text-align: left;
+}
+
+.doc-name-link:hover {
+  text-decoration: underline;
+}
+
+.col-muted {
+  color: #6b7488;
+}
+
+.type-link {
+  color: #3559d6;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+/* ===== Status ===== */
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+}
+
+.status-indexed {
+  color: #1f9d6b;
+}
+.status-indexed .status-dot {
+  background: #21c17a;
+}
+
+.status-processing {
+  color: #c08a1e;
+}
+.status-processing .status-dot {
+  background: #f0b429;
+}
+
+.status-failed {
+  color: #d64545;
+}
+.status-failed .status-dot {
+  background: #e25555;
+}
+
+/* ===== Row actions ===== */
+.row-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* ===== Footer / pagination ===== */
+.card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-top: 16px;
+}
+
+.footer-count {
+  color: #8a94a6;
+  font-size: 13px;
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.page-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid #e6e9f0;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #5a6478;
+  font-size: 13px;
+  padding: 7px 12px;
+  cursor: pointer;
+}
+
+.page-btn:hover {
+  background: #f4f7fb;
+}
+
+.page-num {
+  min-width: 34px;
+  justify-content: center;
+  padding: 7px 0;
+}
+
+.page-num.active {
+  background: #243f95;
+  border-color: #243f95;
+  color: #ffffff;
+}
+
+@media (max-width: 900px) {
+  .card-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .topbar-search input {
+    width: 160px;
+  }
+}

@@ -1,0 +1,94 @@
+<div class="upload-page">
+  <h1 class="page-title">Upload regulation</h1>
+
+  <section class="upload-card">
+    <div class="card-heading">
+      <h2>Upload regulation</h2>
+      <p>Regulation PDF files up to {{ maxFileSizeMb }}MB supported</p>
+    </div>
+
+    <div
+      class="dropzone"
+      [class.dragging]="isDragging()"
+      [class.has-file]="selectedFile()"
+      (dragover)="onDragOver($event)"
+      (dragleave)="onDragLeave()"
+      (drop)="onDrop($event)"
+      (click)="openFilePicker()"
+      role="button"
+      tabindex="0"
+      (keydown.enter)="openFilePicker()"
+      (keydown.space)="$event.preventDefault(); openFilePicker()"
+    >
+      <input
+        #fileInput
+        type="file"
+        accept=".pdf,application/pdf"
+        hidden
+        (change)="onFileSelected($event)"
+      />
+
+      @if (selectedFile(); as file) {
+        <i class="pi pi-file-pdf dropzone-icon selected"></i>
+        <p class="dropzone-title">{{ file.name }}</p>
+        <p class="dropzone-hint">
+          {{ (file.size / (1024 * 1024)) | number: '1.1-2' }} MB ·
+          <button type="button" class="browse-link" (click)="$event.stopPropagation(); openFilePicker()">
+            Change file
+          </button>
+        </p>
+      } @else {
+        <p class="dropzone-title">Drag &amp; drop your PDF here</p>
+        <p class="dropzone-hint">
+          or
+          <button type="button" class="browse-link" (click)="$event.stopPropagation(); openFilePicker()">
+            browse files
+          </button>
+          from your computer
+        </p>
+      }
+
+      <p class="dropzone-footer">Supported: PDF · Max size: {{ maxFileSizeMb }} MB</p>
+    </div>
+
+    @if (uploadError(); as error) {
+      <p class="form-error">{{ error }}</p>
+    }
+
+    <div class="form-field">
+      <label for="chunking-strategy">CHUNKING STRATEGY</label>
+      <p-select
+        inputId="chunking-strategy"
+        [options]="chunkingStrategies"
+        [(ngModel)]="chunkingStrategy"
+        optionLabel="label"
+        optionValue="value"
+        styleClass="upload-select"
+      />
+    </div>
+
+    @if (usesTokenBudget()) {
+      <div class="form-field">
+        <label for="chunk-size">CHUNK SIZE (TOKENS)</label>
+        <input
+          id="chunk-size"
+          type="number"
+          pInputText
+          [(ngModel)]="chunkSize"
+          min="128"
+          max="4096"
+          class="chunk-input"
+        />
+        <span class="field-hint">Overlap sent to API: {{ computedOverlap() }} tokens (10% of chunk size)</span>
+      </div>
+    }
+
+    <p-button
+      [label]="isUploading() ? 'Ingestion in progress...' : 'Start ingestion pipeline'"
+      styleClass="btn-submit"
+      [loading]="isUploading()"
+      [disabled]="isUploading()"
+      (onClick)="startIngestion()"
+    />
+  </section>
+</div>
