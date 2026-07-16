@@ -1,0 +1,61 @@
+<section class="page-header">
+  <p class="eyebrow">User Workspace</p>
+  <h1>Build a multi-store prompt</h1>
+  <p>Search simultaneously in fin-report and fin-regulation, then preview the structured prompt before sending it to the LLM.</p>
+</section>
+
+<p-card header="Prompt builder on fin-report + fin-regulation">
+  <div class="field">
+    <label for="query">Question</label>
+    <textarea
+      pTextarea
+      id="query"
+      rows="4"
+      [(ngModel)]="query"
+      placeholder="Le traitement du fonds commercial est-il conforme au règlement ANC 2022-06 ?"
+    ></textarea>
+  </div>
+
+  <div class="actions">
+    <p-button
+      label="Build prompt"
+      icon="pi pi-file-edit"
+      [loading]="loading"
+      [disabled]="!query.trim() || loading"
+      (onClick)="buildPrompt()"
+    />
+    <div class="spinner-inline" *ngIf="loading">
+      <p-progressSpinner
+        strokeWidth="6"
+        animationDuration=".8s"
+        [style]="{ width: '28px', height: '28px' }"
+      />
+      <span class="hint">Searching both stores and assembling the structured prompt...</span>
+    </div>
+  </div>
+</p-card>
+
+<p-card *ngIf="promptResponse" header="Structured prompt">
+  <article class="prompt-card">
+    <pre>{{ promptResponse.prompt }}</pre>
+  </article>
+</p-card>
+
+<p-card *ngIf="promptResponse?.sources?.length" header="Merged sources used">
+  <article class="result-card" *ngFor="let source of promptResponse?.sources; let index = index">
+    <div class="result-meta">
+      <span>#{{ index + 1 }}</span>
+      <span class="store-badge">{{ source.documentType }}</span>
+      <span class="file-label">{{ source.sourceName }}</span>
+      <span *ngIf="source.pageStart !== null && source.pageStart !== undefined">
+        page{{ source.pageEnd && source.pageEnd !== source.pageStart ? 's' : '' }}
+        {{ source.pageStart }}<ng-container *ngIf="source.pageEnd && source.pageEnd !== source.pageStart">-{{ source.pageEnd }}</ng-container>
+      </span>
+      <span *ngIf="source.score !== null && source.score !== undefined">score: {{ source.score | number:'1.3-3' }}</span>
+    </div>
+
+    <p class="excerpt">{{ source.excerpt }}</p>
+  </article>
+</p-card>
+
+<p-message *ngIf="errorMessage" severity="error" [text]="errorMessage" />

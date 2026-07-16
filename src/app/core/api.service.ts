@@ -59,6 +59,21 @@ export interface ReportAnswerResponse {
   sources: ReportAnswerSource[];
 }
 
+export interface PromptContextSource {
+  documentType: string;
+  sourceName: string;
+  pageStart?: number | null;
+  pageEnd?: number | null;
+  score?: number | null;
+  excerpt: string;
+}
+
+export interface PromptBuildResponse {
+  question: string;
+  prompt: string;
+  sources: PromptContextSource[];
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -188,6 +203,17 @@ export class ApiService {
     return this.http.post<ReportAnswerResponse>(
       `${this.baseUrl}/report/ask`,
       null,
+      { params }
+    );
+  }
+
+  buildMultiStorePrompt(query: string, topK: number = 5): Observable<PromptBuildResponse> {
+    const params = new HttpParams()
+      .set('query', query)
+      .set('topK', topK);
+
+    return this.http.get<PromptBuildResponse>(
+      `${this.baseUrl}/prompt/build`,
       { params }
     );
   }
