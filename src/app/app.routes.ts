@@ -1,5 +1,7 @@
 import { Routes } from '@angular/router';
 import { DashboardPageComponent } from './pages/dashboard-page.component';
+import { ReportIngestionPageComponent } from './pages/report-ingestion-page.component';
+import { SearchLabPageComponent } from './pages/search-lab-page.component';
 import { RegulationIngestionPageComponent } from './pages/regulation-ingestion-page.component';
 import { RegulationHistoryPageComponent } from './pages/regulation-history-page.component';
 
@@ -9,11 +11,19 @@ export const routes: Routes = [
     component: DashboardPageComponent
   },
   {
-    path: 'regulation-ingestion',
+    path: 'user/report-ingestion',
+    component: ReportIngestionPageComponent
+  },
+  {
+    path: 'user/report-search',
+    component: SearchLabPageComponent
+  },
+  {
+    path: 'admin/regulation-ingestion',
     component: RegulationIngestionPageComponent
   },
   {
-    path: 'regulation-history',
+    path: 'admin/regulation-history',
     component: RegulationHistoryPageComponent
   },
   {

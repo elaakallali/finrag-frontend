@@ -1,0 +1,60 @@
+<section class="page-header">
+  <p class="eyebrow">User Workspace</p>
+  <h1>Ask your financial report</h1>
+  <p>Ask a natural-language question and review both the generated answer and the supporting sources.</p>
+</section>
+
+<p-card header="Question answering on fin-report">
+  <div class="field">
+    <label for="query">Question</label>
+    <textarea
+      pTextarea
+      id="query"
+      rows="4"
+      [(ngModel)]="query"
+      placeholder="Quel est le chiffre d'affaires ?"
+    ></textarea>
+  </div>
+
+  <div class="actions">
+    <p-button
+      label="Generate answer"
+      icon="pi pi-search"
+      [loading]="loading"
+      [disabled]="!query.trim() || loading"
+      (onClick)="search()"
+    />
+    <div class="spinner-inline" *ngIf="loading">
+      <p-progressSpinner
+        strokeWidth="6"
+        animationDuration=".8s"
+        [style]="{ width: '28px', height: '28px' }"
+      />
+      <span class="hint">Searching report chunks and generating the answer...</span>
+    </div>
+  </div>
+</p-card>
+
+<p-card *ngIf="answerResponse" header="Generated answer">
+  <article class="answer-card">
+    <p>{{ answerResponse.answer }}</p>
+  </article>
+</p-card>
+
+<p-card *ngIf="answerResponse?.sources?.length" header="Sources used">
+  <article class="result-card" *ngFor="let source of answerResponse?.sources; let index = index">
+    <div class="result-meta">
+      <span>#{{ index + 1 }}</span>
+      <span class="file-label">{{ source.sourceName }}</span>
+      <span *ngIf="source.pageStart !== null && source.pageStart !== undefined">
+        page{{ source.pageEnd && source.pageEnd !== source.pageStart ? 's' : '' }}
+        {{ source.pageStart }}<ng-container *ngIf="source.pageEnd && source.pageEnd !== source.pageStart">-{{ source.pageEnd }}</ng-container>
+      </span>
+      <span *ngIf="source.score !== null && source.score !== undefined">score: {{ source.score | number:'1.3-3' }}</span>
+    </div>
+
+    <p class="excerpt">{{ source.excerpt }}</p>
+  </article>
+</p-card>
+
+<p-message *ngIf="errorMessage" severity="error" [text]="errorMessage" />

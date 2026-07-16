@@ -1,0 +1,59 @@
+<section class="hero">
+  <p-card styleClass="hero-copy-card">
+    <ng-template pTemplate="header">
+      <div class="hero-copy">
+        <p class="eyebrow">Workspace</p>
+        <h1>Separate spaces for users and admins</h1>
+        <p class="lead">
+          Users work with financial reports and search results, while admins upload and track regulatory
+          references in a dedicated area.
+        </p>
+      </div>
+    </ng-template>
+  </p-card>
+
+  <p-card styleClass="hero-stats-card">
+    <div class="stat">
+      <span class="stat-label">User</span>
+      <strong>Upload a report and ask business questions</strong>
+    </div>
+    <div class="stat">
+      <span class="stat-label">Admin</span>
+      <strong>Index regulation documents and monitor ingestion</strong>
+    </div>
+    <div class="stat">
+      <span class="stat-label">Goal</span>
+      <strong>Keep the two journeys clearly separated</strong>
+    </div>
+  </p-card>
+</section>
+
+<section class="action-grid">
+  <p-card styleClass="action-card">
+    <span class="card-kicker">01</span>
+    <h2>User report upload</h2>
+    <p>Send a financial report to the report store so it can be searched afterward.</p>
+    <p-button label="Open page" routerLink="/user/report-ingestion" />
+  </p-card>
+
+  <p-card styleClass="action-card">
+    <span class="card-kicker">02</span>
+    <h2>User search</h2>
+    <p>Search the indexed report content and inspect the retrieved sources and similarity scores.</p>
+    <p-button label="Open page" routerLink="/user/report-search" />
+  </p-card>
+
+  <p-card styleClass="action-card">
+    <span class="card-kicker">03</span>
+    <h2>Admin regulation ingestion</h2>
+    <p>Upload a regulatory reference document and add it to the regulation knowledge base.</p>
+    <p-button label="Open page" routerLink="/admin/regulation-ingestion" />
+  </p-card>
+
+  <p-card styleClass="action-card">
+    <span class="card-kicker">04</span>
+    <h2>Admin regulation history</h2>
+    <p>Review previously indexed regulation documents with their chunk count and ingestion mode.</p>
+    <p-button label="Open page" routerLink="/admin/regulation-history" />
+  </p-card>
+</section>

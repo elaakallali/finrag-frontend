@@ -34,6 +34,7 @@ export interface IngestionHistoryItem {
   maxTokens?: number | null;
   overlapTokens?: number | null;
   dynamicMode: boolean;
+  fileAvailable?: boolean;
   createdAt: string;
 }
 
@@ -45,12 +46,25 @@ export interface SearchResult {
   metadata?: Record<string, unknown>;
 }
 
+export interface ReportAnswerSource {
+  sourceName: string;
+  pageStart?: number | null;
+  pageEnd?: number | null;
+  score?: number | null;
+  excerpt: string;
+}
+
+export interface ReportAnswerResponse {
+  answer: string;
+  sources: ReportAnswerSource[];
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class ApiService {
   private readonly http = inject(HttpClient);
-  private readonly baseUrl = 'http://localhost:8081/api';
+  private readonly baseUrl = '/api';
 
   ingestReport(file: File, strategy: string, maxTokens?: number, overlapTokens?: number): Observable<IngestionStatusResponse> {
     const params = this.buildChunkingParams(strategy, maxTokens, overlapTokens);
@@ -60,6 +74,34 @@ export class ApiService {
       this.toFormData(file),
       { params }
     );
+  }
+
+  startReportDynamicIngestionAsync(file: File, strategy: string, maxTokens?: number, overlapTokens?: number): Observable<IngestionJobResponse> {
+    const params = this.buildChunkingParams(strategy, maxTokens, overlapTokens);
+
+    return this.http.post<IngestionJobResponse>(
+      `${this.baseUrl}/report/ingest/dynamic/async`,
+      this.toFormData(file),
+      { params }
+    );
+  }
+
+  startReportIngestionAsync(file: File, strategy: string, maxTokens?: number, overlapTokens?: number): Observable<IngestionJobResponse> {
+    const params = this.buildClassicChunkingParams(strategy, maxTokens, overlapTokens);
+
+    return this.http.post<IngestionJobResponse>(
+      `${this.baseUrl}/report/ingest/async`,
+      this.toFormData(file),
+      { params }
+    );
+  }
+
+  getReportIngestionProgress(jobId: string): Observable<IngestionProgressResponse> {
+    return this.http.get<IngestionProgressResponse>(`${this.baseUrl}/report/ingest/progress/${jobId}`);
+  }
+
+  cancelReportIngestion(jobId: string): Observable<void> {
+    return this.http.post<void>(`${this.baseUrl}/report/ingest/cancel/${jobId}`, null);
   }
 
   ingestRegulation(file: File, strategy: string, maxTokens?: number, overlapTokens?: number): Observable<IngestionStatusResponse> {
@@ -74,6 +116,18 @@ export class ApiService {
 
   getRegulationHistory(): Observable<IngestionHistoryItem[]> {
     return this.http.get<IngestionHistoryItem[]>(`${this.baseUrl}/regulation/history`);
+  }
+
+  deleteRegulationHistoryItem(id: number): Observable<void> {
+    return this.http.post<void>(`${this.baseUrl}/regulation/history/${id}/delete`, null);
+  }
+
+  viewRegulationHistoryFileUrl(id: number): string {
+    return `${this.baseUrl}/regulation/history/${id}/view`;
+  }
+
+  downloadRegulationHistoryFileUrl(id: number): string {
+    return `${this.baseUrl}/regulation/history/${id}/download`;
   }
 
   startRegulationIngestionAsync(file: File, strategy: string, maxTokens?: number, overlapTokens?: number): Observable<IngestionJobResponse> {
@@ -110,6 +164,10 @@ export class ApiService {
     return this.http.get<IngestionProgressResponse>(`${this.baseUrl}/regulation/ingest/progress/${jobId}`);
   }
 
+  cancelRegulationIngestion(jobId: string): Observable<void> {
+    return this.http.post<void>(`${this.baseUrl}/regulation/ingest/cancel/${jobId}`, null);
+  }
+
   searchReport(query: string, topK: number): Observable<SearchResult[]> {
     const params = new HttpParams()
       .set('query', query)
@@ -117,6 +175,18 @@ export class ApiService {
 
     return this.http.post<SearchResult[]>(
       `${this.baseUrl}/report/search`,
+      null,
+      { params }
+    );
+  }
+
+  askReport(query: string, topK: number = 5): Observable<ReportAnswerResponse> {
+    const params = new HttpParams()
+      .set('query', query)
+      .set('topK', topK);
+
+    return this.http.post<ReportAnswerResponse>(
+      `${this.baseUrl}/report/ask`,
       null,
       { params }
     );
