@@ -6,6 +6,7 @@ import { ButtonModule } from 'primeng/button';
 import { MessageModule } from 'primeng/message';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { TagModule } from 'primeng/tag';
+import { TableModule } from 'primeng/table';
 
 import { ApiService, IngestionHistoryItem } from '../core/api.service';
 import { RegulationHistoryRefreshService } from '../core/regulation-history-refresh.service';
@@ -18,7 +19,8 @@ import { RegulationHistoryRefreshService } from '../core/regulation-history-refr
     ButtonModule,
     MessageModule,
     ProgressSpinnerModule,
-    TagModule
+    TagModule,
+    TableModule
   ],
   template: `
     <section class="page-header">
@@ -58,33 +60,65 @@ import { RegulationHistoryRefreshService } from '../core/regulation-history-refr
         text="No regulation documents have been indexed yet."
       />
 
-      <div *ngIf="!loading && history.length" class="history-table-wrapper">
-        <table class="history-table">
-          <thead>
-            <tr>
-              <th>Document</th>
-              <th>Chunks</th>
-              <th>Mode</th>
-              <th>Strategy</th>
-              <th>Indexed at</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let item of history">
-              <td>{{ item.documentName }}</td>
-              <td>{{ item.chunkCount }}</td>
-              <td>
-                <p-tag
-                  [value]="item.dynamicMode ? 'Dynamic' : 'Classic'"
-                  [severity]="item.dynamicMode ? 'info' : 'contrast'"
+      <p-table
+        *ngIf="!loading && history.length"
+        [value]="history"
+        [paginator]="true"
+        [rows]="10"
+        [rowsPerPageOptions]="[5, 10, 20]"
+        responsiveLayout="scroll"
+        styleClass="history-table"
+      >
+        <ng-template pTemplate="header">
+          <tr>
+            <th>Document</th>
+            <th>Chunks</th>
+            <th>Mode</th>
+            <th>Strategy</th>
+            <th>Indexed at</th>
+            <th>Actions</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-item>
+          <tr>
+            <td>{{ item.documentName }}</td>
+            <td>{{ item.chunkCount }}</td>
+            <td>
+              <p-tag
+                [value]="item.dynamicMode ? 'Dynamic' : 'Classic'"
+                [severity]="item.dynamicMode ? 'info' : 'contrast'"
+              />
+            </td>
+            <td>{{ item.strategy || '-' }}</td>
+            <td>{{ formatDate(item.createdAt) }}</td>
+            <td>
+              <div class="history-actions">
+                <p-button
+                  label="View"
+                  icon="pi pi-eye"
+                  [text]="true"
+                  [disabled]="!item.fileAvailable"
+                  (onClick)="viewFile(item)"
                 />
-              </td>
-              <td>{{ item.strategy || '-' }}</td>
-              <td>{{ formatDate(item.createdAt) }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+                <p-button
+                  label="Download"
+                  icon="pi pi-download"
+                  [text]="true"
+                  [disabled]="!item.fileAvailable"
+                  (onClick)="downloadFile(item)"
+                />
+                <p-button
+                  label="Delete"
+                  icon="pi pi-trash"
+                  severity="danger"
+                  [text]="true"
+                  (onClick)="deleteItem(item)"
+                />
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
     </p-card>
   `,
   styles: [`
@@ -109,33 +143,30 @@ import { RegulationHistoryRefreshService } from '../core/regulation-history-refr
       color: #5b7b82;
     }
 
-    .history-table-wrapper {
-      overflow-x: auto;
+    .history-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      flex-wrap: wrap;
     }
 
-    .history-table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-
-    .history-table th,
-    .history-table td {
+    :host ::ng-deep .history-table .p-datatable-thead > tr > th {
       padding: 0.9rem 0.85rem;
-      border-bottom: 1px solid rgba(12, 52, 61, 0.08);
-      text-align: left;
-      vertical-align: middle;
-    }
-
-    .history-table th {
       font-size: 0.78rem;
       text-transform: uppercase;
       letter-spacing: 0.1em;
       color: #6c858b;
       background: rgba(248, 244, 235, 0.8);
+      text-align: left;
+      border-bottom: 1px solid rgba(12, 52, 61, 0.08);
     }
 
-    .history-table td {
+    :host ::ng-deep .history-table .p-datatable-tbody > tr > td {
+      padding: 0.9rem 0.85rem;
       color: #12373e;
+      text-align: left;
+      vertical-align: middle;
+      border-bottom: 1px solid rgba(12, 52, 61, 0.08);
     }
   `]
 })
@@ -190,5 +221,40 @@ export class RegulationHistoryPageComponent implements OnInit {
       return value;
     }
     return parsed.toLocaleString();
+  }
+
+  protected viewFile(item: IngestionHistoryItem): void {
+    if (!item.fileAvailable) {
+      return;
+    }
+
+    window.open(this.apiService.viewRegulationHistoryFileUrl(item.id), '_blank', 'noopener,noreferrer');
+  }
+
+  protected downloadFile(item: IngestionHistoryItem): void {
+    if (!item.fileAvailable) {
+      return;
+    }
+
+    window.open(this.apiService.downloadRegulationHistoryFileUrl(item.id), '_blank', 'noopener,noreferrer');
+  }
+
+  protected deleteItem(item: IngestionHistoryItem): void {
+    const confirmed = window.confirm(`Delete "${item.documentName}" from history?`);
+    if (!confirmed) {
+      return;
+    }
+
+    this.apiService.deleteRegulationHistoryItem(item.id)
+      .subscribe({
+        next: () => {
+          this.history = this.history.filter(historyItem => historyItem.id !== item.id);
+          this.changeDetectorRef.detectChanges();
+        },
+        error: (error) => {
+          this.errorMessage = error?.error?.error || error?.message || 'Failed to delete regulation history entry.';
+          this.changeDetectorRef.detectChanges();
+        }
+      });
   }
 }
