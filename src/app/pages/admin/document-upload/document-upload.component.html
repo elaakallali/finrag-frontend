@@ -90,5 +90,30 @@
       [disabled]="isUploading()"
       (onClick)="startIngestion()"
     />
+
+    @if (isUploading()) {
+      <div class="ingestion-progress" aria-live="polite">
+        <p class="progress-title">Pipeline d'ingestion</p>
+        <ul class="progress-steps">
+          @for (step of ingestionSteps(); track step.key; let i = $index) {
+            <li class="progress-step" [class]="stepStatus(i)">
+              <span class="step-icon">
+                @if (stepStatus(i) === 'done') {
+                  <i class="pi pi-check"></i>
+                } @else if (stepStatus(i) === 'active') {
+                  <i class="pi pi-spin pi-spinner"></i>
+                } @else {
+                  <i class="pi pi-circle"></i>
+                }
+              </span>
+              <span class="step-label">{{ step.label }}</span>
+            </li>
+          }
+        </ul>
+        <p class="progress-hint">
+          Cette etape peut prendre quelques minutes selon la taille du PDF.
+        </p>
+      </div>
+    }
   </section>
 </div>

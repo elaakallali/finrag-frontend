@@ -1,0 +1,168 @@
+.chat-page {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  margin: -32px;
+  padding: 20px 24px;
+  background: #f4f7fb;
+}
+
+.messages {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-bottom: 16px;
+}
+
+.welcome {
+  margin: 40px auto;
+  color: #8a94a6;
+  text-align: center;
+}
+
+.msg {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.msg.user {
+  align-items: flex-end;
+}
+
+.ai-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.ai-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #243f95;
+  color: #fff;
+  display: grid;
+  place-items: center;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.bubble {
+  max-width: 80%;
+  background: #fff;
+  border: 1px solid #e7ebf3;
+  border-radius: 14px;
+  padding: 14px 16px;
+}
+
+.bubble p {
+  margin: 0;
+  white-space: pre-wrap;
+  line-height: 1.5;
+  font-size: 14px;
+}
+
+.user-bubble {
+  background: #243f95;
+  border-color: #243f95;
+  color: #fff;
+}
+
+.sources {
+  margin-top: 12px;
+  border: 1px solid #e7ebf3;
+  border-radius: 10px;
+  padding: 10px;
+  background: #fafbfe;
+}
+
+.sources-title {
+  margin: 0 0 8px;
+  font-size: 10px;
+  letter-spacing: 0.5px;
+  color: #8a94a6;
+  font-weight: 600;
+}
+
+.source-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 4px 0;
+  font-size: 13px;
+  color: #4d5870;
+}
+
+.source-row .meta {
+  color: #98a1b3;
+  font-size: 12px;
+}
+
+.time {
+  font-size: 11px;
+  color: #98a1b3;
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #6b7488;
+  font-size: 13px;
+}
+
+.footer {
+  border-top: 1px solid #e7ebf3;
+  padding-top: 12px;
+}
+
+.footer-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.status {
+  font-size: 12px;
+  color: #8a94a6;
+}
+
+.input-row {
+  display: flex;
+  gap: 8px;
+  background: #fff;
+  border: 1px solid #e7ebf3;
+  border-radius: 999px;
+  padding: 6px 8px 6px 16px;
+}
+
+.input-row input {
+  flex: 1;
+  border: none;
+  box-shadow: none;
+}
+
+:host ::ng-deep .input-row input:focus {
+  box-shadow: none;
+}
+
+:host ::ng-deep .spinner {
+  width: 24px;
+  height: 24px;
+}

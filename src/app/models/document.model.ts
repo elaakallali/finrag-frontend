@@ -1,15 +1,15 @@
 import type { ChunkingStrategy } from './chunking-strategies';
 
-export type DocumentType = 'report' | 'regulation' | 'policy' | 'financial-statement';
+export type DocumentType = 'report' | 'regulation' ;
 export type { ChunkingStrategy } from './chunking-strategies';
 export type IngestionStatus = 'processing' | 'indexed' | 'failed';
-
+// Request d'ingestion
 export interface DocumentIngestionRequest {
   file: File;
   chunkingStrategy: ChunkingStrategy;
   chunkSize: number;
 }
-
+// Response de l'ingestion
 export interface IngestionResponse {
   success: boolean;
   timestamp: number;
@@ -46,4 +46,18 @@ export interface DocumentPage {
   size: number;
   totalElements: number;
   totalPages: number;
+}
+
+/** Étape du pipeline d'ingestion (fournie par le backend). */
+export interface IngestionStep {
+  key: string;
+  label: string;
+}
+
+/** Statut temps réel d'une ingestion (polling). */
+export interface IngestionProgress {
+  id: string;
+  status: 'PROCESSING' | 'INDEXED' | 'FAILED';
+  currentStep: string | null;
+  errorMessage: string | null;
 }

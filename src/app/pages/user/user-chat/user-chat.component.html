@@ -1,0 +1,82 @@
+<div class="chat-page">
+  <section class="messages">
+    @if (messages.length === 0) {
+      <p class="welcome">
+        Posez votre question <br />
+      </p>
+    }
+
+    @for (msg of messages; track $index) {
+      <article class="msg" [class.user]="msg.role === 'user'">
+        @if (msg.role === 'assistant') {
+          <div class="ai-label">
+            <span class="ai-avatar">AI</span>
+            <strong>FinRAG AI</strong>
+          </div>
+        }
+
+        <div class="bubble" [class.user-bubble]="msg.role === 'user'">
+          <p>{{ msg.text }}</p>
+
+          @if (msg.sources?.length) {
+            <div class="sources">
+              <p class="sources-title">SOURCES RETRIEVED</p>
+              @for (src of msg.sources; track $index) {
+                <div class="source-row">
+                  <span>{{ src.filename }}</span>
+                  <span class="meta">{{ src.section }} · {{ src.store }}</span>
+                  <p-tag [value]="formatScore(src.score)" severity="success" />
+                </div>
+              }
+            </div>
+          }
+        </div>
+
+        <span class="time">{{ msg.time }}</span>
+      </article>
+    }
+
+    @if (isAsking || isUploading) {
+      <div class="loading">
+        <p-progressSpinner strokeWidth="4" styleClass="spinner" />
+        <span>
+          @if (isUploading) {
+            Ingestion du rapport en cours...
+          } @else {
+            Generation en cours...
+          }
+        </span>
+      </div>
+    }
+  </section>
+<!--upload du pdf-->
+  <footer class="footer">
+    <div class="footer-top">
+      <div class="actions">
+        <p-fileUpload
+          mode="basic"
+          chooseLabel="Upload rapport"
+          chooseIcon="pi pi-upload"
+          accept=".pdf"
+          [customUpload]="true"
+          [auto]="true"
+          [disabled]="isUploading"
+          (uploadHandler)="onUpload($event)" />
+      </div>
+    </div>
+
+    <div class="input-row">
+      <input
+        pInputText
+        type="text"
+        placeholder="Ask a question about financial reports or regulations..."
+        [(ngModel)]="question"
+        (keydown.enter)="send()" />
+      <p-button
+        label="Send"
+        icon="pi pi-send"
+        [disabled]="!question.trim() || isAsking"
+        (onClick)="send()" />
+    </div>
+  </footer>
+</div>

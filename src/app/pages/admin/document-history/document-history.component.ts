@@ -39,7 +39,7 @@ export class DocumentHistoryComponent {
 
   // Pagination geree par le backend (3 par page)
   currentPage = 0;
-  pageSize = 3;
+  pageSize = 5;
   totalElements = 0;
 
   constructor(

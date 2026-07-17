@@ -10,54 +10,93 @@
       </div>
     </div>
 
-    <nav class="sidebar-nav">
-      <a
-        routerLink="/report-query"
-        routerLinkActive="active-link"
-        [routerLinkActiveOptions]="{ exact: true }"
-        class="nav-item"
-      >
-        <i class="pi pi-th-large"></i>
-        <span>Dashboard</span>
-      </a>
+    <!-- ========== SIDEBAR ADMIN ========== -->
+    @if (!isUserMode) {
+      <nav class="sidebar-nav">
+        <a
+          routerLink="/report-query"
+          routerLinkActive="active-link"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="nav-item"
+        >
+          <i class="pi pi-th-large"></i>
+          <span>Dashboard</span>
+        </a>
 
-      <a routerLink="/admin/document-history" routerLinkActive="active-link" class="nav-item">
-        <i class="pi pi-file"></i>
-        <span>Documents</span>
-        <span class="badge">1.2k</span>
-      </a>
+        <a routerLink="/admin/document-history" routerLinkActive="active-link" class="nav-item">
+          <i class="pi pi-file"></i>
+          <span>Documents</span>
+          <span class="badge">1.2k</span>
+        </a>
 
-      <a routerLink="/admin/document-upload" routerLinkActive="active-link" class="nav-item">
-        <i class="pi pi-upload"></i>
-        <span>Upload</span>
-      </a>
+        <a routerLink="/admin/document-upload" routerLinkActive="active-link" class="nav-item">
+          <i class="pi pi-upload"></i>
+          <span>Upload</span>
+        </a>
 
-      <a routerLink="/admin/users" routerLinkActive="active-link" class="nav-item">
-        <i class="pi pi-users"></i>
-        <span>Users</span>
-      </a>
-    </nav>
+        <a routerLink="/admin/users" routerLinkActive="active-link" class="nav-item">
+          <i class="pi pi-users"></i>
+          <span>Users</span>
+        </a>
+      </nav>
 
-    <div class="sidebar-footer">
-      <button type="button" class="nav-item logout-button">
-        <i class="pi pi-sign-out"></i>
-        <span>Logout</span>
-      </button>
+      <div class="sidebar-footer">
+        <button type="button" class="nav-item logout-button">
+          <i class="pi pi-sign-out"></i>
+          <span>Logout</span>
+        </button>
 
-      <div class="role-switch" aria-label="Role switch">
-        <button type="button" class="role-option active">Admin</button>
-        <button type="button" class="role-option">User</button>
-      </div>
-
-      <div class="profile-card">
-        <div class="avatar">DA</div>
-        <div class="profile-copy">
-          <span class="profile-name">Dhouha Admin</span>
-          <span class="profile-email">admin&#64;finrag.ai</span>
+        <div class="role-switch" aria-label="Role switch">
+          <a routerLink="/report-query" class="role-option" [class.active]="!isUserMode">Admin</a>
+          <a routerLink="/user" class="role-option" [class.active]="isUserMode">User</a>
         </div>
-        <i class="pi pi-angle-right"></i>
+
+        <div class="profile-card">
+          <div class="avatar">DA</div>
+          <div class="profile-copy">
+            <span class="profile-name">Dhouha Admin</span>
+            <span class="profile-email">admin&#64;finrag.ai</span>
+          </div>
+          <i class="pi pi-angle-right"></i>
+        </div>
       </div>
-    </div>
+    }
+
+    <!-- ========== SIDEBAR USER ========== -->
+    @if (isUserMode) {
+      <nav class="sidebar-nav">
+        <a routerLink="/user" routerLinkActive="active-link" [routerLinkActiveOptions]="{ exact: true }" class="nav-item">
+          <i class="pi pi-comments"></i>
+          <span>Chat</span>
+        </a>
+
+        <a routerLink="/user/history" routerLinkActive="active-link" class="nav-item">
+          <i class="pi pi-history"></i>
+          <span>History</span>
+        </a>
+
+        <a routerLink="/user/profile" routerLinkActive="active-link" class="nav-item">
+          <i class="pi pi-user"></i>
+          <span>Profile</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="role-switch" aria-label="Role switch">
+          <a routerLink="/report-query" class="role-option" [class.active]="!isUserMode">Admin</a>
+          <a routerLink="/user" class="role-option" [class.active]="isUserMode">User</a>
+        </div>
+
+        <div class="profile-card">
+          <div class="avatar">DA</div>
+          <div class="profile-copy">
+            <span class="profile-name">Dhouha Admin</span>
+            <span class="profile-email">Analyst</span>
+          </div>
+          <i class="pi pi-angle-right"></i>
+        </div>
+      </div>
+    }
   </aside>
 
   <main class="main-content">

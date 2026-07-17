@@ -138,6 +138,9 @@
   font: inherit;
   font-size: 10px;
   cursor: pointer;
+  text-decoration: none;
+  display: grid;
+  place-items: center;
 }
 
 .role-option.active {
@@ -198,7 +201,10 @@
 
 .main-content {
   min-width: 0;
+  min-height: 100vh;
   padding: 32px;
+  display: flex;
+  flex-direction: column;
 }
 
 @media (max-width: 720px) {

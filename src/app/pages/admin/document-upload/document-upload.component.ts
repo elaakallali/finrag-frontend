@@ -1,4 +1,4 @@
-import { Component, ElementRef, inject, signal, viewChild } from '@angular/core';
+import { Component, ElementRef, OnDestroy, OnInit, inject, signal, viewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -11,7 +11,7 @@ import {
   ChunkingStrategy,
   findChunkingStrategy
 } from '../../../models/chunking-strategies';
-import { DocumentIngestionRequest } from '../../../models/document.model';
+import { DocumentIngestionRequest, IngestionStep } from '../../../models/document.model';
 
 @Component({
   selector: 'app-document-upload',
@@ -20,7 +20,7 @@ import { DocumentIngestionRequest } from '../../../models/document.model';
   templateUrl: './document-upload.component.html',
   styleUrl: './document-upload.component.css'
 })
-export class DocumentUploadComponent {
+export class DocumentUploadComponent implements OnInit, OnDestroy {
   private readonly fileInput = viewChild<ElementRef<HTMLInputElement>>('fileInput');
   private readonly documentService = inject(DocumentService);
   private readonly router = inject(Router);
@@ -28,13 +28,31 @@ export class DocumentUploadComponent {
   readonly maxFileSizeMb = 100;
   readonly chunkingStrategies = CHUNKING_STRATEGIES;
 
-  chunkingStrategy: ChunkingStrategy = 'mixed';
+  /** Étapes chargées depuis le backend. */
+  readonly ingestionSteps = signal<IngestionStep[]>([]);
+
+  chunkingStrategy: ChunkingStrategy = 'table-aware';
   chunkSize = 512;
 
   readonly selectedFile = signal<File | null>(null);
   readonly isDragging = signal(false);
   readonly uploadError = signal<string | null>(null);
   readonly isUploading = signal(false);
+  readonly currentStepIndex = signal(0);
+
+  /** Timer du polling (interroge le backend toutes les 2s). */
+  private pollTimer: ReturnType<typeof setInterval> | null = null;
+
+  ngOnInit(): void {
+    this.documentService.getIngestionSteps().subscribe({
+      next: (steps) => this.ingestionSteps.set(steps),
+      error: () => this.uploadError.set('Impossible de charger les étapes d\'ingestion.')
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.stopPolling();
+  }
 
   usesTokenBudget(): boolean {
     return findChunkingStrategy(this.chunkingStrategy).usesTokenBudget;
@@ -42,6 +60,17 @@ export class DocumentUploadComponent {
 
   computedOverlap(): number {
     return this.documentService.computeOverlap(this.chunkSize);
+  }
+
+  stepStatus(index: number): 'done' | 'active' | 'pending' {
+    const current = this.currentStepIndex();
+    if (index < current) {
+      return 'done';
+    }
+    if (index === current) {
+      return 'active';
+    }
+    return 'pending';
   }
 
   onDragOver(event: DragEvent): void {
@@ -91,17 +120,18 @@ export class DocumentUploadComponent {
 
     this.uploadError.set(null);
     this.isUploading.set(true);
+    this.currentStepIndex.set(0);
 
+    // 1) Demarre l'ingestion → le backend renvoie l'id tout de suite
     this.documentService.ingestDocument(request).subscribe({
       next: (response) => {
-        this.isUploading.set(false);
-
-        if (!response.success) {
+        if (!response.id) {
+          this.isUploading.set(false);
           this.uploadError.set(response.error ?? 'Ingestion failed.');
           return;
         }
-
-        void this.router.navigate(['/admin/document-history']);
+        // 2) Polling : demande le statut toutes les 2 secondes
+        this.startPolling(response.id);
       },
       error: (error: { error?: { error?: string }; message?: string }) => {
         this.isUploading.set(false);
@@ -110,6 +140,50 @@ export class DocumentUploadComponent {
         );
       }
     });
+  }
+
+  /** Interroge le backend toutes les 2s jusqu'a INDEXED ou FAILED. */
+  private startPolling(id: string): void {
+    this.stopPolling();
+    this.pollOnce(id); // premiere lecture tout de suite
+    this.pollTimer = setInterval(() => this.pollOnce(id), 2000);
+  }
+
+  private pollOnce(id: string): void {
+    this.documentService.getIngestionStatus(id).subscribe({
+      next: (progress) => {
+        const steps = this.ingestionSteps();
+        const idx = steps.findIndex((s) => s.key === progress.currentStep);
+        if (idx >= 0) {
+          this.currentStepIndex.set(idx);
+        }
+
+        if (progress.status === 'INDEXED') {
+          this.stopPolling();
+          this.currentStepIndex.set(Math.max(0, steps.length - 1));
+          this.isUploading.set(false);
+          void this.router.navigate(['/admin/document-history']);
+        }
+
+        if (progress.status === 'FAILED') {
+          this.stopPolling();
+          this.isUploading.set(false);
+          this.uploadError.set(progress.errorMessage ?? 'Ingestion failed.');
+        }
+      },
+      error: () => {
+        this.stopPolling();
+        this.isUploading.set(false);
+        this.uploadError.set('Impossible de recuperer le statut d\'ingestion.');
+      }
+    });
+  }
+
+  private stopPolling(): void {
+    if (this.pollTimer) {
+      clearInterval(this.pollTimer);
+      this.pollTimer = null;
+    }
   }
 
   private setFile(file: File): void {
