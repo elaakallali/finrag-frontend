@@ -1,0 +1,32 @@
+<div class="sources-card">
+  <p class="sources-card__title">Sources utilisées</p>
+
+  <p-table [value]="sortedSources()" styleClass="sources-table">
+    <ng-template #header>
+      <tr>
+        <th>Fichier</th>
+        <th>Page</th>
+        <th>Score de similarité</th>
+      </tr>
+    </ng-template>
+
+    <ng-template #body let-source>
+      <tr>
+        <td class="sources-table__file">
+          <i class="pi pi-file"></i>
+          <span [title]="source.fileName">{{ source.fileName }}</span>
+        </td>
+        <td>{{ source.page ?? '—' }}</td>
+        <td>
+          <p-tag [value]="scoreLabel(source.score)" [severity]="scoreSeverity(source.score)" />
+        </td>
+      </tr>
+    </ng-template>
+
+    <ng-template #emptymessage>
+      <tr>
+        <td colspan="3" class="sources-table__empty">Aucune source pour le moment.</td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>

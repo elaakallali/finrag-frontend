@@ -1,0 +1,76 @@
+<div class="upload-card">
+  <p class="upload-card__title">Uploader un rapport financier</p>
+
+  <p-fileupload
+    #fileUpload
+    mode="advanced"
+    name="file"
+    accept=".pdf,.docx"
+    [multiple]="false"
+    [maxFileSize]="104857600"
+    [customUpload]="true"
+    [showUploadButton]="false"
+    [showCancelButton]="false"
+    chooseLabel="Parcourir"
+    (onSelect)="onFileSelect($event)"
+    (onRemove)="onFileRemove()"
+    (onClear)="onFileRemove()"
+  >
+    <ng-template #toolbar></ng-template>
+
+    <ng-template #empty>
+      <div class="dropzone" (click)="fileUpload.choose()">
+        <div class="dropzone__icon">
+          <i class="pi pi-cloud-upload"></i>
+        </div>
+        <p class="dropzone__text">Glissez votre rapport ici ou cliquez pour parcourir</p>
+        <p class="dropzone__hint">PDF, DOCX jusqu'à 100 Mo</p>
+      </div>
+    </ng-template>
+
+    <ng-template #file let-file>
+      <div class="selected-file">
+        <i class="pi pi-file"></i>
+        <span class="selected-file__name">{{ file.name }}</span>
+        <button
+          type="button"
+          class="selected-file__remove"
+          (click)="fileUpload.clear()"
+          aria-label="Retirer le fichier"
+        >
+          <i class="pi pi-times"></i>
+        </button>
+      </div>
+    </ng-template>
+  </p-fileupload>
+
+  <div class="upload-card__controls">
+    <p-button
+      label="Ingérer le rapport"
+      icon="pi pi-upload"
+      styleClass="brand-button"
+      [disabled]="!selectedFile() || isUploading()"
+      [loading]="isUploading()"
+      (click)="submit()"
+    />
+  </div>
+
+  @if (isUploading()) {
+    <p class="upload-card__hint">
+      Analyse et indexation en cours — cela peut prendre jusqu'à 1 à 2 minutes selon la taille du rapport.
+    </p>
+  }
+
+  @if (result(); as res) {
+    @if (res.success) {
+      <p class="upload-card__success">
+        <i class="pi pi-check-circle"></i>
+        Rapport ingéré avec succès en {{ (res.durationMs / 1000).toFixed(1) }}s.
+      </p>
+    }
+  }
+
+  @if (errorMessage()) {
+    <p class="upload-card__error">{{ errorMessage() }}</p>
+  }
+</div>
