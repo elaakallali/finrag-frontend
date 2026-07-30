@@ -5,7 +5,7 @@ import { ButtonModule } from 'primeng/button';
 import { FileUploadModule } from 'primeng/fileupload';
 import { SelectModule } from 'primeng/select';
 import type { FileSelectEvent } from 'primeng/types/fileupload';
-import { Subscription, interval, startWith, switchMap, takeWhile } from 'rxjs';
+import { Subscription, takeWhile } from 'rxjs';
 
 import {
   CHUNKING_STRATEGIES,
@@ -43,7 +43,6 @@ const STEPS: StepDefinition[] = [
 ];
 
 const STEP_ORDER: IngestionStep[] = STEPS.map((s) => s.key);
-const POLL_INTERVAL_MS = 1000;
 
 @Component({
   selector: 'app-upload-panel',
@@ -53,7 +52,7 @@ const POLL_INTERVAL_MS = 1000;
 })
 export class UploadPanel implements OnDestroy {
   private readonly ingestionService = inject(IngestionService);
-  private pollSubscription: Subscription | null = null;
+  private statusSubscription: Subscription | null = null;
 
   readonly regulationTypes = REGULATION_TYPES;
   readonly strategies = CHUNKING_STRATEGIES;
@@ -71,7 +70,7 @@ export class UploadPanel implements OnDestroy {
   @Output() readonly uploadFailed = new EventEmitter<UploadOutcome & { error: unknown }>();
 
   ngOnDestroy(): void {
-    this.stopPolling();
+    this.stopWatching();
   }
 
   onFileSelect(event: FileSelectEvent): void {
@@ -100,8 +99,22 @@ export class UploadPanel implements OnDestroy {
     this.jobStatus.set(null);
     this.uploadStarted.emit(outcome);
 
-    this.ingestionService.ingestRegulation(file, outcome.regulationType, outcome.strategy).subscribe({
-      next: ({ jobId }) => this.pollStatus(jobId, outcome),
+        this.ingestionService.ingestRegulation(file, outcome.regulationType, outcome.strategy).subscribe({
+      next: ({ jobId }) => {
+        // Affiche tout de suite la liste des étapes (QUEUED en cours), sans attendre le premier
+        // message du serveur : on sait que le job a démarré dès qu'on a le jobId.
+        this.jobStatus.set({
+          jobId,
+          documentName: file.name,
+          step: 'QUEUED',
+          failed: false,
+          errorMessage: null,
+          historyId: null,
+          updatedAt: new Date().toISOString()
+        });
+        this.watchStatus(jobId, outcome);
+      },
+      
       error: (error: unknown) => {
         this.isUploading.set(false);
         this.errorMessage.set(this.resolveErrorMessage(error));
@@ -132,15 +145,14 @@ export class UploadPanel implements OnDestroy {
     return status.step === 'DONE' ? 'done' : 'active';
   }
 
-  private pollStatus(jobId: string, outcome: UploadOutcome): void {
-    this.stopPolling();
+  // Le backend pousse chaque changement d'état via WebSocket (voir IngestionService.watchJobStatus) :
+  // plus besoin de redemander l'état toutes les secondes, on est notifié dès qu'il change vraiment.
+  private watchStatus(jobId: string, outcome: UploadOutcome): void {
+    this.stopWatching();
 
-    this.pollSubscription = interval(POLL_INTERVAL_MS)
-      .pipe(
-        startWith(0),
-        switchMap(() => this.ingestionService.getIngestionStatus(jobId)),
-        takeWhile((status) => status.step !== 'DONE' && !status.failed, true)
-      )
+    this.statusSubscription = this.ingestionService
+      .watchJobStatus(jobId)
+      .pipe(takeWhile((status) => status.step !== 'DONE' && !status.failed, true))
       .subscribe({
         next: (status) => {
           this.jobStatus.set(status);
@@ -162,10 +174,10 @@ export class UploadPanel implements OnDestroy {
       });
   }
 
-  private stopPolling(): void {
-    if (this.pollSubscription !== null) {
-      this.pollSubscription.unsubscribe();
-      this.pollSubscription = null;
+  private stopWatching(): void {
+    if (this.statusSubscription !== null) {
+      this.statusSubscription.unsubscribe();
+      this.statusSubscription = null;
     }
   }
 

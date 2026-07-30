@@ -296,4 +296,24 @@
       border-color: var(--brand-teal-600) !important;
     }
   }
+  .progress-step__live {
+  font-weight: 500;
+  font-size: 11px;
+  color: var(--brand-teal-600);
+  animation: progress-step-blink 1.4s ease-in-out infinite;
+}
+
+.progress-step--active .progress-step__badge i {
+  font-size: 14px;
+}
+
+@keyframes progress-step-blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
 }
