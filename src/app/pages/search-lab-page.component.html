@@ -1,0 +1,147 @@
+<section class="page-header">
+  <p class="eyebrow">User Workspace</p>
+  <h1>FinRAG chat</h1>
+  <p>Choose a conversation, continue it, or start a new chat session.</p>
+</section>
+
+<section class="chat-layout">
+  <p-card header="Chats" class="conversation-panel">
+    <div class="panel-actions">
+      <p-button
+        label="New chat"
+        icon="pi pi-plus"
+        (onClick)="newConversation()"
+      />
+      <p-button
+        icon="pi pi-refresh"
+        severity="secondary"
+        [text]="true"
+        [disabled]="conversationsLoading"
+        (onClick)="refreshConversations()"
+      />
+    </div>
+
+    <p-progressSpinner
+      *ngIf="conversationsLoading"
+      strokeWidth="6"
+      animationDuration=".8s"
+      [style]="{ width: '28px', height: '28px' }"
+    />
+
+    <div class="conversation-list" *ngIf="!conversationsLoading">
+      <button
+        type="button"
+        class="conversation-item"
+        *ngFor="let conversation of conversations"
+        [class.conversation-item-active]="isSelectedConversation(conversation.id)"
+        (click)="selectConversation(conversation.id)"
+      >
+        <div class="conversation-topline">
+          <span class="conversation-title">{{ conversation.title }}</span>
+          <button
+            type="button"
+            class="conversation-delete"
+            aria-label="Delete conversation"
+            (click)="deleteConversation(conversation.id, $event)"
+          >
+            <i class="pi pi-trash"></i>
+          </button>
+        </div>
+        <span class="conversation-date">{{ conversation.updatedAt | date:'short' }}</span>
+      </button>
+    </div>
+  </p-card>
+
+  <p-card header="Conversation" class="thread-panel">
+    <p-progressSpinner
+      *ngIf="messagesLoading"
+      strokeWidth="6"
+      animationDuration=".8s"
+      [style]="{ width: '28px', height: '28px' }"
+    />
+
+    <p class="thread-empty" *ngIf="!messagesLoading && !conversationMessages.length">
+      Send a message to begin this conversation.
+    </p>
+
+    <section class="chat-thread" *ngIf="!messagesLoading">
+      <article
+        class="chat-bubble"
+        *ngFor="let message of conversationMessages"
+        [class.chat-bubble-user]="message.role === 'user'"
+        [class.chat-bubble-assistant]="message.role === 'assistant'"
+        [class.chat-bubble-pending]="message.pending"
+      >
+        <div class="chat-meta">
+          <span class="chat-role">{{ message.role === 'user' ? 'You' : 'FinRAG' }}</span>
+          <span *ngIf="'createdAt' in message && message.createdAt">{{ message.createdAt | date:'short' }}</span>
+        </div>
+
+        <p class="chat-content">{{ message.content }}</p>
+
+        <section class="top-extract" *ngIf="message.role === 'assistant' && topSource(message) as source">
+          <p class="top-extract-label">Top extracted source</p>
+          <div class="top-extract-meta">
+            <span *ngIf="source.documentType">{{ source.documentType }}</span>
+            <span class="file-label">{{ source.sourceName }}</span>
+            <span *ngIf="source.pageStart !== null && source.pageStart !== undefined">
+              page{{ source.pageEnd && source.pageEnd !== source.pageStart ? 's' : '' }}
+              {{ source.pageStart }}<ng-container *ngIf="source.pageEnd && source.pageEnd !== source.pageStart">-{{ source.pageEnd }}</ng-container>
+            </span>
+            <span *ngIf="source.score !== null && source.score !== undefined">
+              score: {{ source.score | number:'1.3-3' }}
+            </span>
+          </div>
+          <p class="top-extract-text">
+            <ng-container *ngIf="topExtractedSourceCanExpand(message); else topExtractedFullText">
+              {{ displayedTopExtractedExcerpt(message) }}
+              <button
+                type="button"
+                class="inline-toggle"
+                (click)="toggleTopSourceExpanded(message)"
+              >
+                {{ expandedSourceMessageId === messageIdentity(message) ? 'See less' : 'See more' }}
+              </button>
+            </ng-container>
+            <ng-template #topExtractedFullText>
+              {{ displayedTopExtractedExcerpt(message) }}
+            </ng-template>
+          </p>
+        </section>
+      </article>
+    </section>
+
+    <div class="composer">
+      <div class="field">
+        <label for="query">Message</label>
+        <textarea
+          pTextarea
+          id="query"
+          rows="3"
+          [(ngModel)]="query"
+          placeholder="Ask a question about the report, the regulation, or a follow-up from this chat."
+        ></textarea>
+      </div>
+
+      <div class="actions">
+        <p-button
+          label="Send"
+          icon="pi pi-send"
+          [loading]="loading"
+          [disabled]="!query.trim() || loading"
+          (onClick)="sendMessage()"
+        />
+        <div class="spinner-inline" *ngIf="loading">
+          <p-progressSpinner
+            strokeWidth="6"
+            animationDuration=".8s"
+            [style]="{ width: '28px', height: '28px' }"
+          />
+          <span class="hint">{{ streamStatus || 'Searching report and regulation chunks, then generating the answer...' }}</span>
+        </div>
+      </div>
+    </div>
+  </p-card>
+</section>
+
+<p-message *ngIf="errorMessage" severity="error" [text]="errorMessage" />
