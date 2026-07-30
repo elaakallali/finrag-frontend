@@ -28,14 +28,14 @@
       </div>
     </ng-template>
 
-    <ng-template #file let-file let-removeFileCallback="removeFileCallback" let-index="index">
+    <ng-template #file let-file>
       <div class="selected-file">
         <i class="pi pi-file"></i>
         <span class="selected-file__name">{{ file.name }}</span>
         <button
           type="button"
           class="selected-file__remove"
-          (click)="removeFileCallback($event, index)"
+          (click)="fileUpload.clear()"
           aria-label="Retirer le fichier"
         >
           <i class="pi pi-times"></i>

@@ -1,0 +1,38 @@
+<div class="ask-card">
+  <p class="ask-card__title">Posez une question sur vos rapports</p>
+
+  <textarea
+    pTextarea
+    rows="3"
+    [autoResize]="true"
+    class="ask-card__textarea"
+    placeholder="Ex : Quel est le chiffre d'affaires 2025 ?"
+    [ngModel]="question()"
+    (ngModelChange)="question.set($event)"
+    (keydown.enter)="$event.preventDefault(); ask()"
+  ></textarea>
+
+  <div class="ask-card__controls">
+    <p-button
+      label="Poser la question"
+      icon="pi pi-send"
+      styleClass="brand-button"
+      [disabled]="!question().trim() || isAsking()"
+      [loading]="isAsking()"
+      (click)="ask()"
+    />
+  </div>
+
+  @if (errorMessage()) {
+    <p class="ask-card__error">{{ errorMessage() }}</p>
+  }
+</div>
+
+@if (response(); as res) {
+  <div class="answer-card">
+    <p class="answer-card__title">Réponse générée</p>
+    <p class="answer-card__text">{{ res.answer }}</p>
+  </div>
+
+  <app-sources-list [sources]="res.sources" />
+}

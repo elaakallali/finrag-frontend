@@ -1,0 +1,60 @@
+<div class="shell">
+  <aside class="sidebar">
+    <div class="sidebar__logo">
+      <div class="sidebar__logo-icon">FR</div>
+      <div>
+        <p class="sidebar__logo-title">FinRAG</p>
+        <p class="sidebar__logo-subtitle">Espace utilisateur</p>
+      </div>
+    </div>
+
+    <nav class="sidebar__nav">
+      <div class="sidebar__nav-item sidebar__nav-item--active">
+        <i class="pi pi-comments"></i>
+        Assistant rapports
+      </div>
+      <div class="sidebar__nav-item">
+        <i class="pi pi-history"></i>
+        Historique des questions
+      </div>
+    </nav>
+
+    <div class="sidebar__logout">
+      <i class="pi pi-sign-out"></i>
+      Déconnexion
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div>
+        <p class="topbar__breadcrumb">Espace utilisateur</p>
+        <p class="topbar__title">Interrogez vos rapports financiers</p>
+      </div>
+      <div class="topbar__actions">
+        <div class="topbar__avatar">MF</div>
+      </div>
+    </header>
+
+    <div class="content">
+      <section class="hero">
+        <div>
+          <h1 class="hero__title">Uploadez, questionnez, obtenez des réponses sourcées</h1>
+          <p class="hero__subtitle">
+            Uploadez un rapport financier dans fin-reports, posez votre question en langage naturel et retrouvez les
+            extraits qui l'appuient.
+          </p>
+        </div>
+        <div class="hero__icons">
+          <div class="hero__icon hero__icon--teal"><i class="pi pi-file"></i></div>
+          <div class="hero__icon hero__icon--coral"><i class="pi pi-comments"></i></div>
+          <div class="hero__icon hero__icon--pink"><i class="pi pi-search"></i></div>
+        </div>
+      </section>
+
+      <app-upload-report-panel />
+
+      <app-ask-panel />
+    </div>
+  </div>
+</div>
