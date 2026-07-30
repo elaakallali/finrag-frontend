@@ -1,7 +1,8 @@
-import { Component, inject } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { filter } from 'rxjs/operators';
+import { ConversationStore } from '../../core/services/conversation-store';
 
 @Component({
   selector: 'app-main-layout',
@@ -9,11 +10,15 @@ import { filter } from 'rxjs/operators';
   templateUrl: './main-layout.component.html',
   styleUrl: './main-layout.component.css'
 })
-export class MainLayoutComponent {
+export class MainLayoutComponent implements OnInit {
   private readonly router = inject(Router);
+  private readonly conversationStore = inject(ConversationStore);
 
   /** true = sidebar User, false = sidebar Admin */
   isUserMode = false;
+
+  readonly conversations = this.conversationStore.conversations;
+  readonly currentConversationId = this.conversationStore.currentId;
 
   constructor() {
     this.isUserMode = this.router.url.startsWith('/user');
@@ -23,6 +28,23 @@ export class MainLayoutComponent {
       .subscribe((event) => {
         const nav = event as NavigationEnd;
         this.isUserMode = nav.urlAfterRedirects.startsWith('/user');
+        if (this.isUserMode) {
+          this.conversationStore.load();
+        }
       });
+  }
+
+  ngOnInit(): void {
+    if (this.isUserMode) {
+      this.conversationStore.load();
+    }
+  }
+
+  createConversation(): void {
+    this.conversationStore.create();
+  }
+
+  selectConversation(id: string): void {
+    this.conversationStore.select(id);
   }
 }

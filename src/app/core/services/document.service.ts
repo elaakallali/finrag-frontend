@@ -5,7 +5,6 @@ import { environment } from '../../../environments/environment';
 import {
   DocumentIngestionRequest,
   DocumentPage,
-  IngestionProgress,
   IngestionResponse,
   IngestionStep
 } from '../../models/document.model';
@@ -27,11 +26,6 @@ export class DocumentService {
   /** Étapes du pipeline d'ingestion affichées pendant le spinner. */
   getIngestionSteps(): Observable<IngestionStep[]> {
     return this.http.get<IngestionStep[]>(`${this.baseUrl}/documents/ingestion-steps`);
-  }
-
-  /** Statut temps réel d'une ingestion (polling toutes les 2s). */
-  getIngestionStatus(id: string): Observable<IngestionProgress> {
-    return this.http.get<IngestionProgress>(`${this.baseUrl}/documents/${id}/status`);
   }
 
   deleteDocument(id: string): Observable<void> {

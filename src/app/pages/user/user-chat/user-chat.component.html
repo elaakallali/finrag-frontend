@@ -49,7 +49,7 @@
       </div>
     }
   </section>
-<!--upload du pdf-->
+
   <footer class="footer">
     <div class="footer-top">
       <div class="actions">
@@ -60,7 +60,7 @@
           accept=".pdf"
           [customUpload]="true"
           [auto]="true"
-          [disabled]="isUploading"
+          [disabled]="isUploading || !currentConversationId"
           (uploadHandler)="onUpload($event)" />
       </div>
     </div>
@@ -75,7 +75,7 @@
       <p-button
         label="Send"
         icon="pi pi-send"
-        [disabled]="!question.trim() || isAsking"
+        [disabled]="!question.trim() || isAsking || !currentConversationId"
         (onClick)="send()" />
     </div>
   </footer>

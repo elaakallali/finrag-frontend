@@ -62,24 +62,27 @@
       </div>
     }
 
-    <!-- ========== SIDEBAR USER ========== -->
+    <!-- ========== SIDEBAR USER : historique des discussions ========== -->
     @if (isUserMode) {
-      <nav class="sidebar-nav">
-        <a routerLink="/user" routerLinkActive="active-link" [routerLinkActiveOptions]="{ exact: true }" class="nav-item">
-          <i class="pi pi-comments"></i>
-          <span>Chat</span>
-        </a>
+      <div class="user-history">
+        <button type="button" class="new-chat-btn" (click)="createConversation()">
+          <i class="pi pi-plus"></i>
+          <span>Nouvelle discussion</span>
+        </button>
 
-        <a routerLink="/user/history" routerLinkActive="active-link" class="nav-item">
-          <i class="pi pi-history"></i>
-          <span>History</span>
-        </a>
-
-        <a routerLink="/user/profile" routerLinkActive="active-link" class="nav-item">
-          <i class="pi pi-user"></i>
-          <span>Profile</span>
-        </a>
-      </nav>
+        <ul class="conv-list">
+          @for (c of conversations(); track c.id) {
+            <li
+              class="conv-item"
+              [class.active]="c.id === currentConversationId()"
+              (click)="selectConversation(c.id)"
+            >
+              <span class="conv-title">{{ c.title }}</span>
+              <span class="conv-date">{{ c.createdAt | date:'dd/MM HH:mm' }}</span>
+            </li>
+          }
+        </ul>
+      </div>
 
       <div class="sidebar-footer">
         <div class="role-switch" aria-label="Role switch">

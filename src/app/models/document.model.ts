@@ -54,7 +54,7 @@ export interface IngestionStep {
   label: string;
 }
 
-/** Statut temps réel d'une ingestion (polling). */
+/** Statut temps réel d'une ingestion (WebSocket /topic/ingestion/{id}). */
 export interface IngestionProgress {
   id: string;
   status: 'PROCESSING' | 'INDEXED' | 'FAILED';

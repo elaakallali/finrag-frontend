@@ -13,7 +13,7 @@
     [paginator]="true"
     [rows]="pageSize"
     [totalRecords]="totalElements"
-    [rowsPerPageOptions]="[pageSize]"
+    [rowsPerPageOptions]="[1,5,10,15]"
     (onLazyLoad)="onPageChange($event)"
     responsiveLayout="scroll"
     styleClass="p-datatable-striped">

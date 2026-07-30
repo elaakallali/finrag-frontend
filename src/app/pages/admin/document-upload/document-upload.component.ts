@@ -2,10 +2,12 @@ import { Component, ElementRef, OnDestroy, OnInit, inject, signal, viewChild } f
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { SelectModule } from 'primeng/select';
 import { DocumentService } from '../../../core/services/document.service';
+import { IngestionSocketService } from '../../../core/services/ingestion-socket.service';
 import {
   CHUNKING_STRATEGIES,
   ChunkingStrategy,
@@ -23,6 +25,7 @@ import { DocumentIngestionRequest, IngestionStep } from '../../../models/documen
 export class DocumentUploadComponent implements OnInit, OnDestroy {
   private readonly fileInput = viewChild<ElementRef<HTMLInputElement>>('fileInput');
   private readonly documentService = inject(DocumentService);
+  private readonly ingestionSocket = inject(IngestionSocketService);
   private readonly router = inject(Router);
 
   readonly maxFileSizeMb = 100;
@@ -40,8 +43,8 @@ export class DocumentUploadComponent implements OnInit, OnDestroy {
   readonly isUploading = signal(false);
   readonly currentStepIndex = signal(0);
 
-  /** Timer du polling (interroge le backend toutes les 2s). */
-  private pollTimer: ReturnType<typeof setInterval> | null = null;
+  /** Abonnement WebSocket a /topic/ingestion/{id}. */
+  private progressSub: Subscription | null = null;
 
   ngOnInit(): void {
     this.documentService.getIngestionSteps().subscribe({
@@ -51,7 +54,7 @@ export class DocumentUploadComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.stopPolling();
+    this.stopWatching();
   }
 
   usesTokenBudget(): boolean {
@@ -130,8 +133,8 @@ export class DocumentUploadComponent implements OnInit, OnDestroy {
           this.uploadError.set(response.error ?? 'Ingestion failed.');
           return;
         }
-        // 2) Polling : demande le statut toutes les 2 secondes
-        this.startPolling(response.id);
+        // 2) WebSocket : snapshot a l'abonnement + updates suivantes
+        this.watchProgress(response.id);
       },
       error: (error: { error?: { error?: string }; message?: string }) => {
         this.isUploading.set(false);
@@ -142,15 +145,9 @@ export class DocumentUploadComponent implements OnInit, OnDestroy {
     });
   }
 
-  /** Interroge le backend toutes les 2s jusqu'a INDEXED ou FAILED. */
-  private startPolling(id: string): void {
-    this.stopPolling();
-    this.pollOnce(id); // premiere lecture tout de suite
-    this.pollTimer = setInterval(() => this.pollOnce(id), 2000);
-  }
-
-  private pollOnce(id: string): void {
-    this.documentService.getIngestionStatus(id).subscribe({
+  private watchProgress(id: string): void {
+    this.stopWatching();
+    this.progressSub = this.ingestionSocket.watch(id).subscribe({
       next: (progress) => {
         const steps = this.ingestionSteps();
         const idx = steps.findIndex((s) => s.key === progress.currentStep);
@@ -159,31 +156,29 @@ export class DocumentUploadComponent implements OnInit, OnDestroy {
         }
 
         if (progress.status === 'INDEXED') {
-          this.stopPolling();
+          this.stopWatching();
           this.currentStepIndex.set(Math.max(0, steps.length - 1));
           this.isUploading.set(false);
           void this.router.navigate(['/admin/document-history']);
         }
 
         if (progress.status === 'FAILED') {
-          this.stopPolling();
+          this.stopWatching();
           this.isUploading.set(false);
           this.uploadError.set(progress.errorMessage ?? 'Ingestion failed.');
         }
       },
       error: () => {
-        this.stopPolling();
+        this.stopWatching();
         this.isUploading.set(false);
-        this.uploadError.set('Impossible de recuperer le statut d\'ingestion.');
+        this.uploadError.set('Impossible de suivre le statut d\'ingestion (WebSocket).');
       }
     });
   }
 
-  private stopPolling(): void {
-    if (this.pollTimer) {
-      clearInterval(this.pollTimer);
-      this.pollTimer = null;
-    }
+  private stopWatching(): void {
+    this.progressSub?.unsubscribe();
+    this.progressSub = null;
   }
 
   private setFile(file: File): void {
