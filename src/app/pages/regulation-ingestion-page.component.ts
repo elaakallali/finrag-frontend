@@ -1,26 +1,33 @@
-import { ChangeDetectorRef, Component, OnDestroy, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Subscription, firstValueFrom, interval, startWith, switchMap } from 'rxjs';
+import { FormsModule } from '@angular/forms';
+import { Subscription, firstValueFrom } from 'rxjs';
 import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
 import { MessageModule } from 'primeng/message';
 import { TagModule } from 'primeng/tag';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { DividerModule } from 'primeng/divider';
+import { SelectModule } from 'primeng/select';
+import { FileUploadModule } from 'primeng/fileupload';
 
-import { ApiService, IngestionJobResponse, IngestionProgressResponse, IngestionStatusResponse } from '../core/api.service';
+import { ApiService, IngestionProgressResponse, IngestionStatusResponse } from '../core/api.service';
+import { IngestionProgressWebSocketService } from '../core/ingestion-progress-websocket.service';
 import { RegulationHistoryRefreshService } from '../core/regulation-history-refresh.service';
 
 @Component({
   selector: 'app-regulation-ingestion-page',
   imports: [
     CommonModule,
+    FormsModule,
     CardModule,
     ButtonModule,
     MessageModule,
     TagModule,
     ProgressSpinnerModule,
-    DividerModule
+    DividerModule,
+    SelectModule,
+    FileUploadModule
   ],
   template: `
     <section class="page-header">
@@ -32,30 +39,43 @@ import { RegulationHistoryRefreshService } from '../core/regulation-history-refr
     <p-card header="Upload regulation document">
       <div class="field">
         <label for="reg-file">Document</label>
-        <input id="reg-file" type="file" accept=".pdf,.doc,.docx,.xlsx,.xls" (change)="onFileSelected($event)" />
+        <p-fileupload
+          inputId="reg-file"
+          mode="basic"
+          name="file"
+          chooseLabel="Choose file"
+          [auto]="false"
+          [multiple]="false"
+          [customUpload]="true"
+          accept=".pdf,.doc,.docx,.xlsx,.xls"
+          (onSelect)="onFileSelected($event)"
+        />
       </div>
 
       <div class="field">
         <label for="ingestion-mode">Ingestion mode</label>
-        <select id="ingestion-mode" [value]="selectedMode" (change)="onModeChange(($any($event.target)).value)">
-          <option value="">Choose a mode</option>
-          <option *ngFor="let mode of ingestionModes" [value]="mode.value">{{ mode.label }}</option>
-        </select>
+        <p-select
+          inputId="ingestion-mode"
+          [options]="ingestionModes"
+          optionLabel="label"
+          optionValue="value"
+          [(ngModel)]="selectedMode"
+          placeholder="Choose a mode"
+          (onChange)="onModeChange($event.value)"
+        />
       </div>
 
       <div class="field">
         <label for="chunking-strategy">Chunking method</label>
-        <select
-          id="chunking-strategy"
-          [value]="selectedStrategy"
+        <p-select
+          inputId="chunking-strategy"
+          [options]="availableStrategies"
+          optionLabel="label"
+          optionValue="value"
+          [(ngModel)]="selectedStrategy"
+          placeholder="Choose a chunking method"
           [disabled]="!selectedMode"
-          (change)="selectedStrategy = ($any($event.target)).value"
-        >
-          <option value="">Choose a chunking method</option>
-          <option *ngFor="let strategy of availableStrategies" [value]="strategy.value">
-            {{ strategy.label }}
-          </option>
-        </select>
+        />
       </div>
 
       <div class="actions">
@@ -84,6 +104,16 @@ import { RegulationHistoryRefreshService } from '../core/regulation-history-refr
         </div>
       </div>
 
+      <div class="actions">
+        <p-button
+          label="Stop ingestion"
+          icon="pi pi-stop"
+          severity="danger"
+          [text]="true"
+          (onClick)="stopIngestion()"
+        />
+      </div>
+
       <div class="stage-timeline">
         <div
           *ngFor="let stage of stageTimeline"
@@ -92,7 +122,7 @@ import { RegulationHistoryRefreshService } from '../core/regulation-history-refr
           [class.stage-active]="isStageActive(stage.key)"
         >
           <div class="stage-marker">
-            <span *ngIf="isStageDone(stage.key)">✓</span>
+            <i *ngIf="isStageDone(stage.key)" class="pi pi-check"></i>
             <span *ngIf="!isStageDone(stage.key)">{{ stage.order }}</span>
           </div>
           <div class="stage-copy">
@@ -110,7 +140,7 @@ import { RegulationHistoryRefreshService } from '../core/regulation-history-refr
       <div class="result-grid">
         <div class="result-item">
           <span class="result-label">Document</span>
-          <strong>{{ selectedFile?.name }}</strong>
+          <strong>{{ currentDocumentName || selectedFile?.name }}</strong>
         </div>
         <div class="result-item">
           <span class="result-label">Chunks generated</span>
@@ -129,6 +159,10 @@ import { RegulationHistoryRefreshService } from '../core/regulation-history-refr
           <strong>{{ response.success ? 'OK' : 'FAILED' }}</strong>
         </div>
       </div>
+    </p-card>
+
+    <p-card *ngIf="progress?.status === 'CANCELLED' && !loading" header="Ingestion stopped">
+      <p-message severity="warn" text="The regulation ingestion was cancelled." />
     </p-card>
 
     <p-card *ngIf="errorMessage && !loading" header="Ingestion failed">
@@ -150,23 +184,6 @@ import { RegulationHistoryRefreshService } from '../core/regulation-history-refr
     .field label {
       font-weight: 600;
       color: #12373e;
-    }
-
-    .field input,
-    .field select {
-      width: 100%;
-      max-width: 28rem;
-      padding: 0.85rem 1rem;
-      border-radius: 0.9rem;
-      border: 1px solid rgba(18, 55, 62, 0.14);
-      background: rgba(255, 255, 255, 0.92);
-      color: #12373e;
-      font: inherit;
-    }
-
-    .field select:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
     }
 
     .actions {
@@ -309,11 +326,14 @@ import { RegulationHistoryRefreshService } from '../core/regulation-history-refr
     }
   `]
 })
-export class RegulationIngestionPageComponent implements OnDestroy {
+export class RegulationIngestionPageComponent implements OnInit, OnDestroy {
+  private static readonly STORAGE_KEY = 'finrag.regulation.ingestionJob';
+
   private readonly apiService = inject(ApiService);
+  private readonly ingestionProgressWebSocketService = inject(IngestionProgressWebSocketService);
   private readonly historyRefreshService = inject(RegulationHistoryRefreshService);
   private readonly changeDetectorRef = inject(ChangeDetectorRef);
-  private pollingSubscription?: Subscription;
+  private progressSubscription?: Subscription;
 
   protected readonly ingestionModes = [
     { label: 'Classic', value: 'classic' },
@@ -335,15 +355,6 @@ export class RegulationIngestionPageComponent implements OnDestroy {
     { label: 'Size based', value: 'size-based' }
   ];
 
-  protected selectedFile: File | null = null;
-  protected loading = false;
-  protected response: IngestionStatusResponse | null = null;
-  protected progress: IngestionProgressResponse | null = null;
-  protected errorMessage = '';
-  protected selectedMode = '';
-  protected selectedStrategy = '';
-  protected currentJobId: string | null = null;
-
   protected readonly stageTimeline = [
     { key: 'QUEUED', order: 1, label: 'Queued', description: 'The ingestion job was created and is waiting to start.' },
     { key: 'PARSING', order: 2, label: 'Parsing', description: 'The backend is reading and extracting the document content.' },
@@ -353,9 +364,23 @@ export class RegulationIngestionPageComponent implements OnDestroy {
     { key: 'DONE', order: 6, label: 'Done', description: 'The ingestion finished successfully and is ready in history.' }
   ] as const;
 
-  protected onFileSelected(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    this.selectedFile = input.files?.[0] ?? null;
+  protected selectedFile: File | null = null;
+  protected loading = false;
+  protected response: IngestionStatusResponse | null = null;
+  protected progress: IngestionProgressResponse | null = null;
+  protected errorMessage = '';
+  protected selectedMode = '';
+  protected selectedStrategy = '';
+  protected currentJobId: string | null = null;
+  protected currentDocumentName = '';
+
+  ngOnInit(): void {
+    this.resumeSavedJob();
+  }
+
+  protected onFileSelected(event: { files?: File[] }): void {
+    this.selectedFile = event.files?.[0] ?? null;
+    this.changeDetectorRef.detectChanges();
   }
 
   protected onModeChange(mode: string): void {
@@ -387,42 +412,6 @@ export class RegulationIngestionPageComponent implements OnDestroy {
     return this.availableStrategies.find((strategy) => strategy.value === this.selectedStrategy)?.label ?? '-';
   }
 
-  protected async submit(): Promise<void> {
-    if (!this.selectedFile || !this.selectedMode || !this.selectedStrategy) {
-      return;
-    }
-
-    this.loading = true;
-    this.response = null;
-    this.progress = null;
-    this.errorMessage = '';
-    this.currentJobId = null;
-    this.changeDetectorRef.detectChanges();
-
-    const request$ = this.selectedMode === 'dynamic'
-      ? this.apiService.startRegulationDynamicIngestionAsync(this.selectedFile, this.selectedStrategy)
-      : this.apiService.startRegulationIngestionAsync(this.selectedFile, this.selectedStrategy);
-
-    try {
-      const job = await firstValueFrom(request$);
-      this.currentJobId = job.jobId;
-      this.progress = {
-        jobId: job.jobId,
-        status: job.status,
-        stage: 'QUEUED'
-      };
-      this.startPolling(job);
-    } catch (error: any) {
-      this.errorMessage = error?.error?.error || error?.message || 'Failed to ingest regulation.';
-      this.loading = false;
-      this.changeDetectorRef.detectChanges();
-    }
-  }
-
-  ngOnDestroy(): void {
-    this.pollingSubscription?.unsubscribe();
-  }
-
   protected get progressStageLabel(): string {
     switch (this.progress?.stage) {
       case 'QUEUED':
@@ -437,10 +426,71 @@ export class RegulationIngestionPageComponent implements OnDestroy {
         return 'Storing in vector database';
       case 'DONE':
         return 'Completed';
+      case 'CANCELLED':
+        return 'Cancelled';
       case 'FAILED':
         return 'Failed';
       default:
         return 'Preparing ingestion';
+    }
+  }
+
+  protected async submit(): Promise<void> {
+    if (!this.selectedFile || !this.selectedMode || !this.selectedStrategy) {
+      return;
+    }
+
+    this.loading = true;
+    this.response = null;
+    this.progress = null;
+    this.errorMessage = '';
+    this.currentJobId = null;
+    this.currentDocumentName = this.selectedFile.name;
+    this.changeDetectorRef.detectChanges();
+
+    const request$ = this.selectedMode === 'dynamic'
+      ? this.apiService.startRegulationDynamicIngestionAsync(this.selectedFile, this.selectedStrategy)
+      : this.apiService.startRegulationIngestionAsync(this.selectedFile, this.selectedStrategy);
+
+    try {
+      const job = await firstValueFrom(request$);
+      this.currentJobId = job.jobId;
+      this.progress = {
+        jobId: job.jobId,
+        status: job.status,
+        stage: 'QUEUED'
+      };
+      this.persistJob();
+      this.subscribeToProgress(job.jobId);
+    } catch (error: any) {
+      this.errorMessage = error?.error?.error || error?.message || 'Failed to ingest regulation.';
+      this.loading = false;
+      this.clearSavedJob();
+      this.changeDetectorRef.detectChanges();
+    }
+  }
+
+  protected async stopIngestion(): Promise<void> {
+    if (!this.currentJobId || !this.loading) {
+      return;
+    }
+
+    try {
+      await firstValueFrom(this.apiService.cancelRegulationIngestion(this.currentJobId));
+      this.progress = {
+        ...(this.progress ?? { jobId: this.currentJobId, documentName: this.currentDocumentName }),
+        jobId: this.currentJobId,
+        status: 'CANCELLED',
+        stage: 'CANCELLED',
+        error: 'Ingestion cancelled by user.'
+      };
+      this.loading = false;
+      this.progressSubscription?.unsubscribe();
+      this.clearSavedJob();
+      this.changeDetectorRef.detectChanges();
+    } catch (error: any) {
+      this.errorMessage = error?.error?.error || error?.message || 'Failed to stop regulation ingestion.';
+      this.changeDetectorRef.detectChanges();
     }
   }
 
@@ -454,17 +504,44 @@ export class RegulationIngestionPageComponent implements OnDestroy {
     return this.progress?.stage === stageKey;
   }
 
-  private startPolling(job: IngestionJobResponse): void {
-    this.pollingSubscription?.unsubscribe();
+  ngOnDestroy(): void {
+    this.progressSubscription?.unsubscribe();
+  }
 
-    this.pollingSubscription = interval(1500)
-      .pipe(
-        startWith(0),
-        switchMap(() => this.apiService.getRegulationIngestionProgress(job.jobId))
-      )
+  private resumeSavedJob(): void {
+    const savedJob = this.readSavedJob();
+    if (!savedJob?.jobId) {
+      return;
+    }
+
+    this.selectedMode = savedJob.mode ?? this.selectedMode;
+    this.selectedStrategy = savedJob.strategy ?? this.selectedStrategy;
+    this.currentDocumentName = savedJob.documentName ?? '';
+    this.currentJobId = savedJob.jobId;
+    this.loading = true;
+    this.progress = {
+      jobId: savedJob.jobId,
+      status: savedJob.status ?? 'QUEUED',
+      stage: savedJob.stage ?? 'QUEUED',
+      documentName: savedJob.documentName ?? undefined,
+      chunkCount: savedJob.chunkCount ?? null,
+      timestamp: savedJob.timestamp ?? null,
+      error: savedJob.error ?? null,
+      success: savedJob.success ?? null
+    };
+
+    this.subscribeToProgress(savedJob.jobId);
+  }
+
+  private subscribeToProgress(jobId: string): void {
+    this.progressSubscription?.unsubscribe();
+
+    this.progressSubscription = this.ingestionProgressWebSocketService.connect(jobId)
       .subscribe({
         next: (progress) => {
           this.progress = progress;
+          this.currentDocumentName = progress.documentName || this.currentDocumentName;
+          this.persistJob();
 
           if (progress.status === 'DONE') {
             this.response = {
@@ -475,21 +552,78 @@ export class RegulationIngestionPageComponent implements OnDestroy {
             };
             this.loading = false;
             this.historyRefreshService.notify();
-            this.pollingSubscription?.unsubscribe();
+            this.progressSubscription?.unsubscribe();
+            this.clearSavedJob();
           } else if (progress.status === 'FAILED') {
             this.errorMessage = progress.error || 'Failed to ingest regulation.';
             this.loading = false;
-            this.pollingSubscription?.unsubscribe();
+            this.progressSubscription?.unsubscribe();
+            this.clearSavedJob();
+          } else if (progress.status === 'CANCELLED') {
+            this.loading = false;
+            this.progressSubscription?.unsubscribe();
+            this.clearSavedJob();
           }
 
           this.changeDetectorRef.detectChanges();
         },
-        error: (error) => {
-          this.errorMessage = error?.error?.error || error?.message || 'Failed to fetch ingestion progress.';
+        error: (error: any) => {
+          this.errorMessage = error?.error?.error || error?.message || 'WebSocket connection lost while tracking ingestion progress.';
           this.loading = false;
+          this.progressSubscription?.unsubscribe();
+          this.clearSavedJob();
           this.changeDetectorRef.detectChanges();
-          this.pollingSubscription?.unsubscribe();
         }
       });
+  }
+
+  private persistJob(): void {
+    if (!this.currentJobId) {
+      return;
+    }
+
+    const payload = {
+      jobId: this.currentJobId,
+      documentName: this.currentDocumentName,
+      mode: this.selectedMode,
+      strategy: this.selectedStrategy,
+      status: this.progress?.status ?? 'QUEUED',
+      stage: this.progress?.stage ?? 'QUEUED',
+      chunkCount: this.progress?.chunkCount ?? null,
+      timestamp: this.progress?.timestamp ?? null,
+      error: this.progress?.error ?? null,
+      success: this.progress?.success ?? null
+    };
+
+    localStorage.setItem(RegulationIngestionPageComponent.STORAGE_KEY, JSON.stringify(payload));
+  }
+
+  private clearSavedJob(): void {
+    localStorage.removeItem(RegulationIngestionPageComponent.STORAGE_KEY);
+  }
+
+  private readSavedJob(): {
+    jobId: string;
+    documentName?: string;
+    mode?: string;
+    strategy?: string;
+    status?: string;
+    stage?: string;
+    chunkCount?: number | null;
+    timestamp?: number | null;
+    error?: string | null;
+    success?: boolean | null;
+  } | null {
+    const raw = localStorage.getItem(RegulationIngestionPageComponent.STORAGE_KEY);
+    if (!raw) {
+      return null;
+    }
+
+    try {
+      return JSON.parse(raw);
+    } catch {
+      this.clearSavedJob();
+      return null;
+    }
   }
 }

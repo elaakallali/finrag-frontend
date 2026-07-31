@@ -53,6 +53,12 @@
   </p-card>
 
   <p-card header="Conversation" class="thread-panel">
+    <div class="report-binding" *ngIf="activeReportName">
+      <span class="report-binding-label">Attached report</span>
+      <span class="report-binding-name">{{ activeReportName }}</span>
+      <span class="report-binding-state" *ngIf="reportUploading">uploading...</span>
+    </div>
+
     <p-progressSpinner
       *ngIf="messagesLoading"
       strokeWidth="6"
@@ -119,17 +125,30 @@
           id="query"
           rows="3"
           [(ngModel)]="query"
-          placeholder="Ask a question about the report, the regulation, or a follow-up from this chat."
+          placeholder="Ask a question about the uploaded report, the regulation, or a follow-up from this chat."
         ></textarea>
       </div>
+
+      <p class="upload-status" *ngIf="reportUploadMessage">{{ reportUploadMessage }}</p>
 
       <div class="actions">
         <p-button
           label="Send"
           icon="pi pi-send"
           [loading]="loading"
-          [disabled]="!query.trim() || loading"
+          [disabled]="!query.trim() || loading || reportUploading"
           (onClick)="sendMessage()"
+        />
+        <p-fileupload
+          mode="basic"
+          name="file"
+          chooseLabel="Upload"
+          chooseIcon="pi pi-upload"
+          [customUpload]="true"
+          [auto]="true"
+          accept=".pdf"
+          [disabled]="reportUploading || loading"
+          (uploadHandler)="uploadConversationReport($event)"
         />
         <div class="spinner-inline" *ngIf="loading">
           <p-progressSpinner

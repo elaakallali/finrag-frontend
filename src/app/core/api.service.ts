@@ -89,6 +89,8 @@ export interface ChatConversation {
   id: number;
   title: string;
   lastMessagePreview?: string | null;
+  reportIngestionKey?: string | null;
+  reportDocumentName?: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -304,6 +306,13 @@ export class ApiService {
 
   deleteChatConversation(conversationId: number): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/chat/conversations/${conversationId}`);
+  }
+
+  uploadChatConversationReport(conversationId: number, file: File): Observable<ChatConversation> {
+    return this.http.post<ChatConversation>(
+      `${this.baseUrl}/chat/conversations/${conversationId}/report`,
+      this.toFormData(file)
+    );
   }
 
   askChatConversation(conversationId: number, query: string, topK: number = 5): Observable<ReportAnswerResponse> {

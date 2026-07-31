@@ -1,19 +1,55 @@
 import { ChangeDetectorRef, Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Subscription, finalize } from 'rxjs';
+import { Observable, Subscription, finalize } from 'rxjs';
 import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
 import { MessageModule } from 'primeng/message';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { TextareaModule } from 'primeng/textarea';
+import { FileUploadModule } from 'primeng/fileupload';
 
 import {
   ApiService,
-  ChatConversation,
-  ChatMessage,
   ReportAnswerResponse
 } from '../core/api.service';
+
+type ChatConversation = {
+  id: number;
+  title: string;
+  lastMessagePreview?: string | null;
+  reportIngestionKey?: string | null;
+  reportDocumentName?: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+type ChatMessage = {
+  id: number;
+  conversationId: number;
+  role: 'user' | 'assistant' | string;
+  content: string;
+  sources: ReportAnswerResponse['sources'];
+  topK?: number | null;
+  createdAt: string;
+};
+
+type SearchAnswerStreamEvent = {
+  type: string;
+  message?: string | null;
+  answerChunk?: string | null;
+  response?: ReportAnswerResponse | null;
+};
+
+type SearchLabApi = ApiService & {
+  createChatConversation(title?: string): Observable<ChatConversation>;
+  getChatConversations(): Observable<ChatConversation[]>;
+  getChatMessages(conversationId: number): Observable<ChatMessage[]>;
+  deleteChatConversation(conversationId: number): Observable<void>;
+  uploadChatConversationReport(conversationId: number, file: File): Observable<ChatConversation>;
+  askChatConversation(conversationId: number, query: string, topK?: number): Observable<ReportAnswerResponse>;
+  streamChatConversation(conversationId: number, query: string, topK?: number): Observable<SearchAnswerStreamEvent>;
+};
 
 type PendingBubble = {
   role: 'user' | 'assistant';
@@ -31,7 +67,8 @@ type PendingBubble = {
     ButtonModule,
     MessageModule,
     ProgressSpinnerModule,
-    TextareaModule
+    TextareaModule,
+    FileUploadModule
   ],
   templateUrl: './search-lab-page.component.html',
   styleUrl: './search-lab-page.component.scss'
@@ -40,7 +77,7 @@ export class SearchLabPageComponent implements OnInit, OnDestroy {
   private static readonly DEFAULT_TOP_K = 5;
   private static readonly TOP_SOURCE_PREVIEW_LIMIT = 320;
 
-  private readonly apiService = inject(ApiService);
+  private readonly apiService = inject(ApiService) as SearchLabApi;
   private readonly changeDetectorRef = inject(ChangeDetectorRef);
   private streamSubscription: Subscription | null = null;
 
@@ -48,6 +85,9 @@ export class SearchLabPageComponent implements OnInit, OnDestroy {
   protected loading = false;
   protected errorMessage = '';
   protected streamStatus = '';
+  protected reportUploadMessage = '';
+  protected reportUploading = false;
+  protected localAttachedReportName = '';
 
   protected conversationsLoading = false;
   protected messagesLoading = false;
@@ -70,6 +110,10 @@ export class SearchLabPageComponent implements OnInit, OnDestroy {
 
   protected get selectedConversation(): ChatConversation | null {
     return this.conversations.find(item => item.id === this.selectedConversationId) ?? null;
+  }
+
+  protected get activeReportName(): string {
+    return this.selectedConversation?.reportDocumentName || this.localAttachedReportName;
   }
 
   protected get conversationMessages(): Array<ChatMessage | PendingBubble> {
@@ -109,6 +153,8 @@ export class SearchLabPageComponent implements OnInit, OnDestroy {
     this.pendingAssistantSources = [];
     this.streamStatus = '';
     this.loading = false;
+    this.reportUploadMessage = '';
+    this.localAttachedReportName = this.conversations.find(item => item.id === conversationId)?.reportDocumentName || '';
     this.expandedSourceMessageId = null;
     this.streamSubscription?.unsubscribe();
     this.loadMessages(conversationId);
@@ -190,6 +236,36 @@ export class SearchLabPageComponent implements OnInit, OnDestroy {
     this.loadConversations(false);
   }
 
+  protected uploadConversationReport(event: { files?: File[] }): void {
+    const file = event.files?.[0];
+    if (!file) {
+      return;
+    }
+
+    this.errorMessage = '';
+    this.reportUploadMessage = '';
+    this.localAttachedReportName = file.name;
+
+    if (this.selectedConversationId == null) {
+      this.apiService.createChatConversation().subscribe({
+        next: (conversation) => {
+          this.conversations = [conversation, ...this.conversations.filter(item => item.id !== conversation.id)];
+          this.selectedConversationId = conversation.id;
+          this.changeDetectorRef.detectChanges();
+          this.runReportUpload(conversation.id, file);
+        },
+        error: (error) => {
+          console.error('Unable to create a new conversation before uploading', error);
+          this.errorMessage = error?.error?.error || error?.message || 'Unable to create a new chat for the report upload.';
+          this.changeDetectorRef.detectChanges();
+        }
+      });
+      return;
+    }
+
+    this.runReportUpload(this.selectedConversationId, file);
+  }
+
   protected deleteConversation(conversationId: number, event?: Event): void {
     event?.stopPropagation();
 
@@ -206,6 +282,8 @@ export class SearchLabPageComponent implements OnInit, OnDestroy {
           this.pendingAssistantAnswer = '';
           this.pendingAssistantSources = [];
           this.streamStatus = '';
+          this.reportUploadMessage = '';
+          this.localAttachedReportName = '';
           this.loading = false;
           this.newConversation();
           return;
@@ -279,6 +357,37 @@ export class SearchLabPageComponent implements OnInit, OnDestroy {
           console.error('Unable to load conversation messages', error);
           this.messages = [];
           this.errorMessage = error?.error?.error || error?.message || 'Unable to load chat messages.';
+          this.changeDetectorRef.detectChanges();
+        }
+      });
+  }
+
+  private runReportUpload(conversationId: number, file: File): void {
+    this.reportUploading = true;
+    this.localAttachedReportName = file.name;
+    this.reportUploadMessage = `Uploading ${file.name}...`;
+    this.changeDetectorRef.detectChanges();
+
+    this.apiService.uploadChatConversationReport(conversationId, file)
+      .pipe(finalize(() => {
+        this.reportUploading = false;
+        this.changeDetectorRef.detectChanges();
+      }))
+      .subscribe({
+        next: (conversation) => {
+          this.conversations = [
+            conversation,
+            ...this.conversations.filter(item => item.id !== conversation.id)
+          ];
+          this.selectedConversationId = conversation.id;
+          this.localAttachedReportName = conversation.reportDocumentName || file.name;
+          this.reportUploadMessage = `Attached report: ${this.localAttachedReportName}`;
+          this.changeDetectorRef.detectChanges();
+        },
+        error: (error) => {
+          console.error('Unable to upload the conversation report', error);
+          this.errorMessage = error?.error?.error || error?.message || 'Unable to upload the report for this chat.';
+          this.reportUploadMessage = `Upload failed for ${file.name}.`;
           this.changeDetectorRef.detectChanges();
         }
       });

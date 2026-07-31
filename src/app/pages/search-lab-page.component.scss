@@ -181,6 +181,38 @@
   padding-top: 1.25rem;
 }
 
+.report-binding {
+  display: flex;
+  gap: 0.65rem;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid rgba(28, 185, 128, 0.2);
+  border-radius: 1rem;
+  background: #eefaf4;
+}
+
+.report-binding-label,
+.upload-status,
+.upload-hint {
+  color: #5b7b82;
+}
+
+.report-binding-name {
+  color: #12373e;
+  font-weight: 700;
+}
+
+.report-binding-state {
+  color: #5b7b82;
+  font-size: 0.9rem;
+}
+
+.upload-status {
+  margin: 0 0 1rem;
+}
+
 textarea[ptextarea] {
   width: 100%;
 }
