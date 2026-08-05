@@ -1,0 +1,173 @@
+<section class="page-header">
+  <p class="eyebrow">User Workspace</p>
+  <h1>Report ingestion</h1>
+  <p>Upload a financial report, choose the ingestion strategy, and monitor indexing progress.</p>
+</section>
+
+<p-card header="Upload report">
+  <div class="field">
+    <label for="report-file">Document</label>
+    <p-fileupload
+      inputId="report-file"
+      mode="basic"
+      name="file"
+      chooseLabel="Choose file"
+      [auto]="false"
+      [multiple]="false"
+      [customUpload]="true"
+      accept=".pdf,.doc,.docx,.xlsx,.xls"
+      (onSelect)="onFileSelected($event)"
+    />
+  </div>
+
+  <div class="field-grid">
+    <div class="field">
+      <label for="report-ingestion-mode">Ingestion mode</label>
+      <p-select
+        inputId="report-ingestion-mode"
+        [options]="ingestionModes"
+        optionLabel="label"
+        optionValue="value"
+        [(ngModel)]="selectedMode"
+        placeholder="Choose a mode"
+        (onChange)="onModeChange($event.value)"
+      />
+    </div>
+
+    <div class="field">
+      <label for="report-chunking-strategy">Chunking method</label>
+      <p-select
+        inputId="report-chunking-strategy"
+        [options]="availableStrategies"
+        optionLabel="label"
+        optionValue="value"
+        [(ngModel)]="selectedStrategy"
+        placeholder="Choose a chunking method"
+        [disabled]="!selectedMode"
+      />
+    </div>
+  </div>
+
+  <div class="field-grid compact-grid">
+    <div class="field">
+      <label for="report-max-tokens">Maximum tokens</label>
+      <p-inputnumber
+        inputId="report-max-tokens"
+        [(ngModel)]="maxTokens"
+        [min]="100"
+        [max]="4000"
+        [step]="50"
+      />
+    </div>
+
+    <div class="field">
+      <label for="report-overlap-tokens">Overlap tokens</label>
+      <p-inputnumber
+        inputId="report-overlap-tokens"
+        [(ngModel)]="overlapTokens"
+        [min]="0"
+        [max]="2000"
+        [step]="10"
+      />
+    </div>
+  </div>
+
+  <div class="actions">
+    <p-button
+      label="Start ingestion"
+      icon="pi pi-book"
+      [loading]="loading"
+      [disabled]="!canSubmit"
+      (onClick)="submit()"
+    />
+    <p-tag *ngIf="selectedFile" [value]="selectedFile.name" severity="contrast" />
+  </div>
+</p-card>
+
+<p-card *ngIf="loading" header="Ingestion in progress">
+  <div class="progress-panel">
+    <p-progressSpinner
+      strokeWidth="6"
+      animationDuration=".8s"
+      [style]="{ width: '72px', height: '72px' }"
+    />
+    <div>
+      <h3>{{ progressStageLabel }}</h3>
+      <p *ngIf="progress?.documentName">{{ progress.documentName }}</p>
+      <p *ngIf="currentDocumentName && !progress?.documentName">{{ currentDocumentName }}</p>
+      <p *ngIf="currentJobId" class="progress-meta">Job ID: {{ currentJobId }}</p>
+    </div>
+  </div>
+
+  <div class="actions">
+    <p-button
+      label="Stop ingestion"
+      icon="pi pi-stop"
+      severity="danger"
+      [text]="true"
+      (onClick)="stopIngestion()"
+    />
+  </div>
+
+  <div class="stage-timeline">
+    <div
+      *ngFor="let stage of stageTimeline"
+      class="stage-item"
+      [class.stage-done]="isStageDone(stage.key)"
+      [class.stage-active]="isStageActive(stage.key)"
+    >
+      <div class="stage-marker">
+        <i *ngIf="isStageDone(stage.key)" class="pi pi-check"></i>
+        <span *ngIf="!isStageDone(stage.key)">{{ stage.order }}</span>
+      </div>
+      <div class="stage-copy">
+        <strong>{{ stage.label }}</strong>
+        <span>{{ stage.description }}</span>
+      </div>
+    </div>
+  </div>
+</p-card>
+
+<p-card *ngIf="response && !loading" header="Ingestion completed">
+  <p-message severity="success" text="The report was indexed successfully." />
+  <p-divider />
+
+  <div class="result-grid">
+    <div class="result-item">
+      <span class="result-label">Document</span>
+      <strong>{{ currentDocumentName || selectedFile?.name }}</strong>
+    </div>
+    <div class="result-item">
+      <span class="result-label">Chunks generated</span>
+      <strong>{{ response.chunkCount ?? 0 }}</strong>
+    </div>
+    <div class="result-item">
+      <span class="result-label">Mode</span>
+      <strong>{{ selectedModeLabel }}</strong>
+    </div>
+    <div class="result-item">
+      <span class="result-label">Chunking method</span>
+      <strong>{{ selectedStrategyLabel }}</strong>
+    </div>
+    <div class="result-item">
+      <span class="result-label">Max tokens</span>
+      <strong>{{ maxTokens }}</strong>
+    </div>
+    <div class="result-item">
+      <span class="result-label">Overlap</span>
+      <strong>{{ overlapTokens }}</strong>
+    </div>
+    <div class="result-item">
+      <span class="result-label">Status</span>
+      <strong>{{ response.success ? 'OK' : 'FAILED' }}</strong>
+    </div>
+  </div>
+</p-card>
+
+<p-card *ngIf="progress?.status === 'CANCELLED' && !loading" header="Ingestion stopped">
+  <p-message severity="warn" text="The report ingestion was cancelled." />
+</p-card>
+
+<p-card *ngIf="errorMessage && !loading" header="Ingestion failed">
+  <p-message severity="error" [text]="errorMessage" />
+</p-card>

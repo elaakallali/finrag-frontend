@@ -61,16 +61,36 @@
   gap: 0.55rem;
 }
 
-.nav-links a {
-  color: rgba(246, 251, 251, 0.88);
-  text-decoration: none;
-  padding: 0.9rem 1rem;
+.nav-group {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.nav-label {
+  margin: 1rem 0 0.35rem;
+  color: rgba(246, 251, 251, 0.9);
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+::ng-deep .nav-button {
+  width: 100%;
+}
+
+::ng-deep .nav-button .p-button {
+  width: 100%;
+  justify-content: flex-start;
+  border: 0;
   border-radius: 1rem;
+  padding: 0.9rem 1rem;
+  color: rgba(246, 251, 251, 0.92);
+  background: transparent;
+  box-shadow: none;
   transition: background-color 160ms ease, transform 160ms ease;
 }
 
-.nav-links a:hover,
-.nav-links a.active {
+::ng-deep .nav-button .p-button:hover,
+::ng-deep .nav-button.active .p-button {
   background: rgba(255, 255, 255, 0.11);
   transform: translateX(2px);
 }
