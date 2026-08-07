@@ -4,6 +4,11 @@ import { CommonModule } from '@angular/common';
 import { filter } from 'rxjs/operators';
 import { ConversationStore } from '../../core/services/conversation-store';
 
+/**
+ * Layout + sidebar.
+ * La sidebar User LIT le signal conversations du store.
+ * Elle ne genere pas le titre : elle affiche ce que le store contient apres load/refresh.
+ */
 @Component({
   selector: 'app-main-layout',
   imports: [CommonModule, RouterLink, RouterLinkActive, RouterOutlet],
@@ -17,6 +22,10 @@ export class MainLayoutComponent implements OnInit {
   /** true = sidebar User, false = sidebar Admin */
   isUserMode = false;
 
+  /**
+   * Reference au signal du store (pas une copie).
+   * Dans le HTML : conversations() → Angular re-affiche quand refresh() fait .set(list).
+   */
   readonly conversations = this.conversationStore.conversations;
   readonly currentConversationId = this.conversationStore.currentId;
 
@@ -28,6 +37,7 @@ export class MainLayoutComponent implements OnInit {
       .subscribe((event) => {
         const nav = event as NavigationEnd;
         this.isUserMode = nav.urlAfterRedirects.startsWith('/user');
+        // Entree /user → 1er chargement de la liste
         if (this.isUserMode) {
           this.conversationStore.load();
         }

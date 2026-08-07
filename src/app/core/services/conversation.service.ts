@@ -25,6 +25,10 @@ export class ConversationService {
     return this.http.post<Conversation>(this.baseUrl, null, { params });
   }
 
+  /**
+   * Liste des conversations (id, title, createdAt).
+   * Appele par ConversationStore.load() et refresh() → alimente la sidebar.
+   */
   list(): Observable<Conversation[]> {
     return this.http.get<Conversation[]>(this.baseUrl);
   }

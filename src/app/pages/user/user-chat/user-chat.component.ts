@@ -46,8 +46,7 @@ export class UserChatComponent implements OnInit, OnDestroy {
   private lastLoadedId: string | null = null;
 
   constructor() {
-    // Quand on change de discussion dans la sidebar bleue → recharge les messages
-    effect(() => {
+    effect(() => {// Il surveille convid Dès que l'utilisateur choisit une autre conversation, on recharge ses messages.
       const id = this.conversationStore.currentId();
       if (id && id !== this.lastLoadedId) {
         this.selectConversation(id);
@@ -245,6 +244,10 @@ export class UserChatComponent implements OnInit, OnDestroy {
           this.isAsking = false;
         }
 
+        // Fin du stream SSE :
+        // 1) backend a deja sauve ASSISTANT + eventuel titre Ollama en base
+        // 2) refresh() → GET /conversations → signal conversations mis a jour
+        // 3) sidebar (MainLayout) re-affiche {{ c.title }} automatiquement
         if (event.type === 'done') {
           this.isAsking = false;
           this.conversationStore.refresh();

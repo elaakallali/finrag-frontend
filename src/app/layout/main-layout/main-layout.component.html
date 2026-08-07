@@ -63,6 +63,12 @@
     }
 
     <!-- ========== SIDEBAR USER : historique des discussions ========== -->
+    <!--
+      Enchainement affichage titre :
+      1) store.conversations (signal) est rempli par load() ou refresh()
+      2) @for lit conversations() → chaque c.title vient de GET /api/conversations
+      3) apres "done" du chat, refresh() met a jour le signal → {{ c.title }} change tout seul
+    -->
     @if (isUserMode) {
       <div class="user-history">
         <button type="button" class="new-chat-btn" (click)="createConversation()">
@@ -77,6 +83,7 @@
               [class.active]="c.id === currentConversationId()"
               (click)="selectConversation(c.id)"
             >
+              <!-- Titre lu depuis le store (API), pas depuis Ollama directement -->
               <span class="conv-title">{{ c.title }}</span>
               <span class="conv-date">{{ c.createdAt | date:'dd/MM HH:mm' }}</span>
             </li>
