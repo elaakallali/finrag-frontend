@@ -67,6 +67,7 @@ import { RegulationHistoryRefreshService } from '../core/regulation-history-refr
               <th>Mode</th>
               <th>Strategy</th>
               <th>Indexed at</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -81,6 +82,31 @@ import { RegulationHistoryRefreshService } from '../core/regulation-history-refr
               </td>
               <td>{{ item.strategy || '-' }}</td>
               <td>{{ formatDate(item.createdAt) }}</td>
+              <td>
+                <div class="actions-cell">
+                  <p-button
+                    icon="pi pi-eye"
+                    label="View"
+                    severity="secondary"
+                    [text]="true"
+                    (onClick)="viewItem(item.id)"
+                  />
+                  <p-button
+                    icon="pi pi-download"
+                    label="Download"
+                    severity="secondary"
+                    [text]="true"
+                    (onClick)="downloadItem(item.id)"
+                  />
+                  <p-button
+                    icon="pi pi-trash"
+                    label="Delete"
+                    severity="danger"
+                    [text]="true"
+                    (onClick)="deleteItem(item.id)"
+                  />
+                </div>
+              </td>
             </tr>
           </tbody>
         </table>
@@ -137,6 +163,13 @@ import { RegulationHistoryRefreshService } from '../core/regulation-history-refr
     .history-table td {
       color: #12373e;
     }
+
+    .actions-cell {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+      align-items: center;
+    }
   `]
 })
 export class RegulationHistoryPageComponent implements OnInit {
@@ -190,5 +223,26 @@ export class RegulationHistoryPageComponent implements OnInit {
       return value;
     }
     return parsed.toLocaleString();
+  }
+
+  protected viewItem(id: number): void {
+    window.open(this.apiService.viewRegulationHistoryFileUrl(id), '_blank', 'noopener');
+  }
+
+  protected downloadItem(id: number): void {
+    window.open(this.apiService.downloadRegulationHistoryFileUrl(id), '_blank', 'noopener');
+  }
+
+  protected deleteItem(id: number): void {
+    this.apiService.deleteRegulationHistoryItem(id).subscribe({
+      next: () => {
+        this.history = this.history.filter((item) => item.id !== id);
+        this.changeDetectorRef.detectChanges();
+      },
+      error: (error) => {
+        this.errorMessage = error?.error?.error || error?.message || 'Failed to delete the regulation document.';
+        this.changeDetectorRef.detectChanges();
+      }
+    });
   }
 }
