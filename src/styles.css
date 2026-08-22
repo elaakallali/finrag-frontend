@@ -1,5 +1,30 @@
 @import "primeicons/primeicons.css";
 
+:root,
+.app-dark {
+  --fr-bg-deep: #040b1c;
+  --fr-bg: #07122b;
+  --fr-bg-elevated: #0a1633;
+  --fr-surface: rgba(255, 255, 255, 0.05);
+  --fr-surface-2: rgba(255, 255, 255, 0.08);
+  --fr-surface-solid: #0d1a36;
+  --fr-border: rgba(160, 190, 255, 0.14);
+  --fr-border-strong: rgba(160, 190, 255, 0.28);
+  --fr-text: #f4f7ff;
+  --fr-muted: #9aa8c7;
+  --fr-accent: #6eb6ff;
+  --fr-accent-strong: #3d8dff;
+  --fr-gold: #e8c47a;
+  --fr-danger: #ff8b8b;
+  --fr-success: #6ee7b7;
+  --fr-btn: #ffffff;
+  --fr-btn-text: #0c1a38;
+  --fr-glow: rgba(70, 150, 255, 0.35);
+  --fr-radius: 14px;
+  --fr-font: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --fr-grid: rgba(120, 160, 220, 0.06);
+}
+
 * {
   box-sizing: border-box;
 }
@@ -8,4 +33,139 @@ html,
 body {
   min-height: 100%;
   margin: 0;
+}
+
+body {
+  color: var(--fr-text);
+  font-family: var(--fr-font);
+  background:
+    radial-gradient(ellipse 70% 50% at 90% 10%, var(--fr-glow), transparent 55%),
+    radial-gradient(ellipse 40% 35% at 5% 90%, rgba(20, 60, 140, 0.22), transparent 50%),
+    linear-gradient(165deg, var(--fr-bg-deep) 0%, var(--fr-bg) 50%, var(--fr-bg-elevated) 100%);
+  background-attachment: fixed;
+}
+
+/* Surfaces partagées */
+.fr-card,
+.users-card,
+.documents-card,
+.upload-card,
+.overview-card,
+.panel-card,
+.page-topbar {
+  background: var(--fr-surface) !important;
+  border: 1px solid var(--fr-border) !important;
+  border-radius: var(--fr-radius) !important;
+  box-shadow: 0 12px 40px rgba(0, 10, 40, 0.28) !important;
+  backdrop-filter: blur(10px);
+  color: var(--fr-text);
+}
+
+.stat-card,
+.dropzone {
+  background: var(--fr-surface) !important;
+  border: 1px solid var(--fr-border) !important;
+  border-radius: 12px !important;
+  color: var(--fr-text);
+}
+
+.user-name,
+.stat-value,
+.dropzone-title,
+.topbar-title,
+.page-title {
+  color: var(--fr-text) !important;
+}
+
+.user-email,
+.stat-label,
+.dropzone-subtitle,
+.card-subtitle {
+  color: var(--fr-muted) !important;
+}
+
+.user-avatar,
+.topbar-avatar,
+.stat-icon-blue,
+.stat-icon-green,
+.stat-icon-teal {
+  background: rgba(110, 182, 255, 0.15) !important;
+  color: var(--fr-accent) !important;
+}
+
+.role-admin,
+.role-user {
+  background: rgba(110, 182, 255, 0.15) !important;
+  color: var(--fr-accent) !important;
+}
+
+
+.card-heading h2,
+.card-header h2,
+.page-title,
+.topbar-title,
+.card-heading {
+  color: var(--fr-text) !important;
+}
+
+.card-subtitle,
+.card-heading p,
+.lead-muted {
+  color: var(--fr-muted) !important;
+}
+
+/* Inputs / selects dark */
+input.p-inputtext,
+.p-inputtext,
+.p-select,
+.p-textarea {
+  background: rgba(255, 255, 255, 0.04) !important;
+  border-color: var(--fr-border-strong) !important;
+  color: var(--fr-text) !important;
+}
+
+input.p-inputtext::placeholder,
+.p-inputtext::placeholder {
+  color: var(--fr-muted) !important;
+}
+
+/* Boutons primaires type landing */
+.btn-navy.p-button,
+:host ::ng-deep .btn-navy.p-button,
+.p-button.btn-navy {
+  background: var(--fr-btn) !important;
+  border-color: var(--fr-btn) !important;
+  color: var(--fr-btn-text) !important;
+  border-radius: 999px !important;
+  font-weight: 700 !important;
+}
+
+.btn-navy.p-button:hover,
+.p-button.btn-navy:hover {
+  filter: brightness(0.95);
+}
+
+/* Tables PrimeNG */
+.p-datatable,
+.p-datatable .p-datatable-thead > tr > th,
+.p-datatable .p-datatable-tbody > tr > td {
+  background: transparent !important;
+  color: var(--fr-text) !important;
+  border-color: var(--fr-border) !important;
+}
+
+.p-datatable .p-datatable-tbody > tr:hover {
+  background: rgba(255, 255, 255, 0.04) !important;
+}
+
+.p-dialog .p-dialog-header,
+.p-dialog .p-dialog-content,
+.p-dialog .p-dialog-footer {
+  background: var(--fr-surface-solid) !important;
+  color: var(--fr-text) !important;
+  border-color: var(--fr-border) !important;
+}
+
+.p-tag {
+  border-radius: 999px;
 }

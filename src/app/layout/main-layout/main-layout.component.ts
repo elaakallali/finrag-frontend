@@ -1,8 +1,9 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, computed, inject } from '@angular/core';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { filter } from 'rxjs/operators';
 import { ConversationStore } from '../../core/services/conversation-store';
+import { AuthService } from '../../core/services/auth.service';
 
 /**
  * Layout + sidebar.
@@ -18,16 +19,18 @@ import { ConversationStore } from '../../core/services/conversation-store';
 export class MainLayoutComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly conversationStore = inject(ConversationStore);
+  readonly auth = inject(AuthService);
 
   /** true = sidebar User, false = sidebar Admin */
   isUserMode = false;
 
-  /**
-   * Reference au signal du store (pas une copie).
-   * Dans le HTML : conversations() → Angular re-affiche quand refresh() fait .set(list).
-   */
   readonly conversations = this.conversationStore.conversations;
   readonly currentConversationId = this.conversationStore.currentId;
+  readonly loadError = this.conversationStore.loadError;
+  readonly displayName = computed(() => this.auth.displayName());
+  readonly initials = computed(() => this.auth.initials());
+  readonly email = computed(() => this.auth.currentUser()?.email ?? '');
+  readonly isAdmin = this.auth.isAdmin;
 
   constructor() {
     this.isUserMode = this.router.url.startsWith('/user');
@@ -37,7 +40,6 @@ export class MainLayoutComponent implements OnInit {
       .subscribe((event) => {
         const nav = event as NavigationEnd;
         this.isUserMode = nav.urlAfterRedirects.startsWith('/user');
-        // Entree /user → 1er chargement de la liste
         if (this.isUserMode) {
           this.conversationStore.load();
         }
@@ -56,5 +58,18 @@ export class MainLayoutComponent implements OnInit {
 
   selectConversation(id: string): void {
     this.conversationStore.select(id);
+  }
+
+  deleteConversation(id: string, event: Event): void {
+    event.stopPropagation();
+    if (!confirm('Supprimer cette discussion ?')) {
+      return;
+    }
+    this.conversationStore.delete(id);
+  }
+
+  logout(): void {
+    this.conversationStore.clear();
+    this.auth.logout();
   }
 }

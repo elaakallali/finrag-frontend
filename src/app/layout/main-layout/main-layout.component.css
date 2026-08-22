@@ -1,19 +1,21 @@
 .layout-wrapper {
   min-height: 100vh;
   display: grid;
-  grid-template-columns: 240px minmax(0, 1fr);
-  background: #f4f7fb;
-  color: #172033;
-  font-family: "Inter", "Segoe UI", Arial, sans-serif;
+  grid-template-columns: 250px minmax(0, 1fr);
+  color: var(--fr-text);
+  font-family: var(--fr-font);
+  background: transparent;
 }
 
 .sidebar {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background: #243f95;
-  color: #ffffff;
+  background: linear-gradient(180deg, rgba(10, 22, 50, 0.96), rgba(6, 14, 32, 0.98));
+  border-right: 1px solid var(--fr-border);
+  color: var(--fr-text);
   overflow: hidden;
+  backdrop-filter: blur(12px);
 }
 
 .sidebar-header {
@@ -21,22 +23,23 @@
   align-items: center;
   gap: 10px;
   padding: 22px 20px 18px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  border-bottom: 1px solid var(--fr-border);
 }
 
 .logo-box {
-  width: 30px;
-  height: 30px;
+  width: 34px;
+  height: 34px;
   display: grid;
   place-items: center;
   flex: 0 0 auto;
-  border-radius: 8px;
-  background: #1dd7c0;
-  box-shadow: 0 8px 18px rgba(20, 28, 66, 0.2);
+  border-radius: 9px;
+  background: linear-gradient(145deg, #3d8dff, #1a5fd4);
+  box-shadow: 0 8px 20px rgba(40, 110, 255, 0.35);
 }
 
 .logo-box i {
   font-size: 15px;
+  color: #fff;
 }
 
 .logo-texts {
@@ -48,14 +51,15 @@
 .logo-title {
   font-size: 15px;
   font-weight: 700;
-  letter-spacing: 0.5px;
+  letter-spacing: -0.02em;
   line-height: 1;
 }
 
 .logo-subtitle {
-  color: #bac8ef;
+  color: var(--fr-muted);
   font-size: 9px;
-  letter-spacing: 0.8px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
   white-space: nowrap;
 }
 
@@ -65,7 +69,6 @@
   padding: 12px 8px;
 }
 
-/* Historique des discussions (mode User) */
 .user-history {
   flex: 1;
   min-height: 0;
@@ -77,23 +80,34 @@
 
 .new-chat-btn {
   width: 100%;
-  min-height: 36px;
+  min-height: 38px;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  border-radius: 8px;
-  background: transparent;
-  color: #ffffff;
+  border: 1px solid var(--fr-border-strong);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--fr-text);
   font: inherit;
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
+  transition: background 0.2s ease;
 }
 
 .new-chat-btn:hover {
-  background: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.conv-error {
+  margin: 0 4px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: rgba(255, 80, 80, 0.14);
+  color: #ffd0d0;
+  font-size: 0.75rem;
+  line-height: 1.35;
 }
 
 .conv-list {
@@ -108,19 +122,29 @@
 
 .conv-item {
   display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding: 10px 12px;
-  border-radius: 8px;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 10px 10px 12px;
+  border-radius: 10px;
   cursor: pointer;
+  border: 1px solid transparent;
 }
 
 .conv-item:hover {
-  background: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
 }
 
 .conv-item.active {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(110, 182, 255, 0.12);
+  border-color: rgba(110, 182, 255, 0.25);
+}
+
+.conv-main {
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
 .conv-title {
@@ -133,20 +157,45 @@
 
 .conv-date {
   font-size: 11px;
-  color: #bac8ef;
+  color: var(--fr-muted);
+}
+
+.conv-delete {
+  flex: 0 0 auto;
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--fr-muted);
+  cursor: pointer;
+  opacity: 0.55;
+  transition: opacity 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+
+.conv-item:hover .conv-delete,
+.conv-item.active .conv-delete {
+  opacity: 1;
+}
+
+.conv-delete:hover {
+  background: rgba(255, 100, 100, 0.16);
+  color: #ffb4b4;
 }
 
 .nav-item {
   width: 100%;
-  min-height: 33px;
+  min-height: 36px;
   display: grid;
   grid-template-columns: 20px 1fr auto;
   align-items: center;
   gap: 8px;
   border: 0;
-  border-radius: 7px;
+  border-radius: 10px;
   background: transparent;
-  color: #edf3ff;
+  color: rgba(244, 247, 255, 0.88);
   font: inherit;
   font-size: 14px;
   line-height: 1;
@@ -158,12 +207,13 @@
 
 .nav-item i {
   font-size: 14px;
-  color: #ffffff;
+  color: var(--fr-accent);
 }
 
 .nav-item:hover,
 .nav-item.active-link {
-  background: rgba(255, 255, 255, 0.17);
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
 }
 
 .badge {
@@ -173,8 +223,8 @@
   min-width: 32px;
   height: 16px;
   border-radius: 999px;
-  background: #1ed6bd;
-  color: #ffffff;
+  background: rgba(110, 182, 255, 0.25);
+  color: var(--fr-accent);
   font-size: 10px;
   font-weight: 600;
 }
@@ -195,19 +245,20 @@
   grid-template-columns: 1fr 1fr;
   gap: 3px;
   padding: 4px;
-  border-radius: 8px;
-  background: #ffffff;
-  box-shadow: 0 7px 18px rgba(19, 30, 78, 0.22);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--fr-border);
 }
 
 .role-option {
-  min-height: 25px;
+  min-height: 28px;
   border: 0;
-  border-radius: 6px;
+  border-radius: 999px;
   background: transparent;
-  color: #132660;
+  color: var(--fr-muted);
   font: inherit;
-  font-size: 10px;
+  font-size: 11px;
+  font-weight: 600;
   cursor: pointer;
   text-decoration: none;
   display: grid;
@@ -215,19 +266,22 @@
 }
 
 .role-option.active {
-  background: #f2f5fb;
-  box-shadow: 0 1px 5px rgba(23, 32, 51, 0.12);
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--fr-btn-text);
 }
 
 .profile-card {
   min-height: 58px;
   display: grid;
-  grid-template-columns: 30px 1fr 14px;
+  grid-template-columns: 30px 1fr;
   align-items: center;
   gap: 9px;
   margin: 8px -16px 0;
   padding: 10px 16px;
-  border-top: 1px solid rgba(255, 255, 255, 0.13);
+  border-top: 1px solid var(--fr-border);
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
 }
 
 .avatar {
@@ -236,7 +290,7 @@
   display: grid;
   place-items: center;
   border-radius: 999px;
-  background: #1dd7c0;
+  background: linear-gradient(145deg, #3d8dff, #1a5fd4);
   color: #ffffff;
   font-size: 10px;
   font-weight: 800;
@@ -261,21 +315,20 @@
 }
 
 .profile-email {
-  color: #c5d0f3;
+  color: var(--fr-muted);
   font-size: 10px;
-}
-
-.profile-card i {
-  color: #b7c4ed;
-  font-size: 12px;
 }
 
 .main-content {
   min-width: 0;
   min-height: 100vh;
-  padding: 32px;
+  padding: 28px;
   display: flex;
   flex-direction: column;
+  background:
+    linear-gradient(rgba(120, 160, 220, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(120, 160, 220, 0.035) 1px, transparent 1px);
+  background-size: 48px 48px;
 }
 
 @media (max-width: 720px) {

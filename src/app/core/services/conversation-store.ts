@@ -1,35 +1,24 @@
 import { Injectable, inject, signal } from '@angular/core';
+import { firstValueFrom } from 'rxjs';
 import { ConversationService } from './conversation.service';
 import { Conversation } from '../../models/conversation.model';
 
-/**
- * Etat partage entre :
- * - la sidebar (MainLayout) qui AFFICHE la liste
- * - le chat (UserChat) qui DECLENCHE le refresh apres "done"
- *
- * Les deux composants injectent le MEME store (providedIn: 'root').
- * Quand refresh() met a jour le signal conversations, la sidebar se re-rend toute seule.
- */
 @Injectable({ providedIn: 'root' })
 export class ConversationStore {
   private readonly conversationService = inject(ConversationService);
 
-  /** Liste affichee dans la sidebar (signal reactif Angular). */
   readonly conversations = signal<Conversation[]>([]);
-
-  /** Discussion selectionnee (surbrillance + messages charges dans le chat). */
   readonly currentId = signal<string | null>(null);
+  readonly loadError = signal<string | null>(null);
+  readonly loading = signal(false);
 
-  /**
-   * 1er chargement (entree mode User).
-   * - remplit la liste
-   * - cree une discussion si vide
-   * - selectionne la 1re si aucune selection
-   */
   load(): void {
+    this.loading.set(true);
+    this.loadError.set(null);
     this.conversationService.list().subscribe({
       next: (list) => {
         this.conversations.set(list);
+        this.loading.set(false);
         if (list.length === 0) {
           this.create();
           return;
@@ -37,34 +26,79 @@ export class ConversationStore {
         if (!this.currentId()) {
           this.currentId.set(list[0].id);
         }
+      },
+      error: () => {
+        this.loading.set(false);
+        this.loadError.set('Impossible de charger vos discussions. Reconnectez-vous.');
       }
     });
   }
 
-  /**
-   * Mise a jour de la liste APRES generation du titre (ou tout changement serveur).
-   * Difference avec load() :
-   * - ne cree PAS de conversation
-   * - ne change PAS currentId (on reste sur la meme discussion)
-   * - remplace seulement conversations → Angular met a jour {{ c.title }} dans la sidebar
-   */
   refresh(): void {
     this.conversationService.list().subscribe({
-      next: (list) => this.conversations.set(list)
+      next: (list) => this.conversations.set(list),
+      error: () => {
+        /* ignore refresh errors */
+      }
     });
   }
 
-  /** Ajoute une discussion en tete de liste et la selectionne. */
   create(): void {
     this.conversationService.create('Nouvelle discussion').subscribe({
       next: (created) => {
         this.conversations.update((list) => [created, ...list]);
         this.currentId.set(created.id);
+        this.loadError.set(null);
+      },
+      error: () => {
+        this.loadError.set('Impossible de créer une discussion.');
       }
     });
   }
 
+  /** Garantit qu'une conversation est sélectionnée (crée si besoin). */
+  async ensureCurrentConversation(): Promise<string> {
+    const existing = this.currentId();
+    if (existing) {
+      return existing;
+    }
+
+    const created = await firstValueFrom(
+      this.conversationService.create('Nouvelle discussion')
+    );
+    this.conversations.update((list) => [created, ...list]);
+    this.currentId.set(created.id);
+    return created.id;
+  }
+
   select(id: string): void {
     this.currentId.set(id);
+  }
+
+  delete(id: string): void {
+    this.conversationService.delete(id).subscribe({
+      next: () => {
+        const remaining = this.conversations().filter((c) => c.id !== id);
+        this.conversations.set(remaining);
+
+        if (this.currentId() === id) {
+          if (remaining.length > 0) {
+            this.currentId.set(remaining[0].id);
+          } else {
+            this.currentId.set(null);
+            this.create();
+          }
+        }
+      },
+      error: () => {
+        this.loadError.set('Impossible de supprimer la discussion.');
+      }
+    });
+  }
+
+  clear(): void {
+    this.conversations.set([]);
+    this.currentId.set(null);
+    this.loadError.set(null);
   }
 }

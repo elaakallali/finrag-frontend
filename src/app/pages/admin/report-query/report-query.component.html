@@ -7,7 +7,7 @@
         <input type="text" pInputText placeholder="Search documents, queries..." />
       </p-iconfield>
       <p-button label="Upload" icon="pi pi-upload" styleClass="btn-navy" routerLink="/admin/document-upload" />
-      <div class="topbar-avatar">DA</div>
+      <div class="topbar-avatar">{{ initials() }}</div>
     </div>
   </header>
 
@@ -17,33 +17,41 @@
       <p-select
         [options]="periodOptions"
         [(ngModel)]="selectedPeriod"
+        (ngModelChange)="onPeriodChange()"
         optionLabel="label"
         optionValue="value"
         styleClass="period-select"
       />
     </div>
 
-    <div class="metrics-grid">
-      @for (metric of metrics; track metric.label) {
-        <article class="metric-card">
-          <div class="metric-icon" [class]="metric.iconClass">
-            <i [class]="metric.icon"></i>
-          </div>
-          <div class="metric-copy">
-            <span class="metric-label">{{ metric.label }}</span>
-            <span class="metric-value">{{ metric.value }}</span>
-            <span
-              class="metric-trend"
-              [class.trend-up]="metric.trendType === 'up'"
-              [class.trend-sync]="metric.trendType === 'sync'"
-              [class.trend-file]="metric.trendType === 'file'"
-            >
-              {{ metric.trend }}
-            </span>
-          </div>
-        </article>
-      }
-    </div>
+    @if (error) {
+      <p class="dashboard-error">{{ error }}</p>
+    } @else if (loading) {
+      <p class="dashboard-loading">Loading dashboard…</p>
+    } @else {
+      <div class="metrics-grid">
+        @for (metric of metrics; track metric.label) {
+          <article class="metric-card">
+            <div class="metric-icon" [class]="metric.iconClass">
+              <i [class]="metric.icon"></i>
+            </div>
+            <div class="metric-copy">
+              <span class="metric-label">{{ metric.label }}</span>
+              <span class="metric-value">{{ metric.value }}</span>
+              <span
+                class="metric-trend"
+                [class.trend-up]="metric.trendType === 'up'"
+                [class.trend-down]="metric.trendType === 'down'"
+                [class.trend-sync]="metric.trendType === 'sync'"
+                [class.trend-file]="metric.trendType === 'file'"
+              >
+                {{ metric.trend }}
+              </span>
+            </div>
+          </article>
+        }
+      </div>
+    }
   </section>
 
   <section class="charts-grid">
@@ -53,12 +61,14 @@
           <h2>Documents uploaded per month</h2>
           <p>6-month trend by type</p>
         </div>
-        <span class="panel-year">2026</span>
+        <span class="panel-year">{{ chartYear }}</span>
       </div>
       @if (chartsReady && uploadsChartData && uploadsChartOptions) {
         <div class="chart-wrap bar-chart-wrap">
           <p-chart type="bar" [data]="uploadsChartData" [options]="uploadsChartOptions" />
         </div>
+      } @else if (!loading) {
+        <p class="panel-empty">No upload data yet</p>
       }
     </article>
 
@@ -74,7 +84,7 @@
           <div class="chart-wrap donut-chart-wrap">
             <p-chart type="doughnut" [data]="typesChartData" [options]="typesChartOptions" />
             <div class="donut-center">
-              <span class="donut-percent">63%</span>
+              <span class="donut-percent">{{ reportsSharePct }}%</span>
               <span class="donut-label">Reports</span>
             </div>
           </div>
@@ -83,12 +93,12 @@
           <div class="legend-item">
             <span class="legend-dot legend-navy"></span>
             <span>Reports</span>
-            <strong>784</strong>
+            <strong>{{ reportsCount }}</strong>
           </div>
           <div class="legend-item">
             <span class="legend-dot legend-teal"></span>
             <span>Regulations</span>
-            <strong>464</strong>
+            <strong>{{ regulationsCount }}</strong>
           </div>
         </div>
       </div>
@@ -101,17 +111,21 @@
           <p>Recent pipeline events</p>
         </div>
       </div>
-      <ul class="activity-list">
-        @for (item of activities; track item.title) {
-          <li class="activity-item">
-            <span class="activity-dot tone-{{ item.tone }}"></span>
-            <div class="activity-copy">
-              <span class="activity-title">{{ item.title }} <em>{{ item.status }}</em></span>
-              <span class="activity-time">{{ item.time }}</span>
-            </div>
-          </li>
-        }
-      </ul>
+      @if (activities.length === 0 && !loading) {
+        <p class="panel-empty">No ingestion activity yet</p>
+      } @else {
+        <ul class="activity-list">
+          @for (item of activities; track item.id) {
+            <li class="activity-item">
+              <span class="activity-dot tone-{{ item.tone }}"></span>
+              <div class="activity-copy">
+                <span class="activity-title">{{ item.title }} <em>{{ item.status }}</em></span>
+                <span class="activity-time">{{ item.uploadedAt }}</span>
+              </div>
+            </li>
+          }
+        </ul>
+      }
     </article>
   </section>
 </div>

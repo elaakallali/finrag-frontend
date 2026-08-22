@@ -1,7 +1,7 @@
 :host {
   display: block;
-  font-family: "Inter", "Segoe UI", Arial, sans-serif;
-  color: #172033;
+  font-family: var(--fr-font);
+  color: var(--fr-text);
 }
 
 .users-page {
@@ -16,8 +16,8 @@
   justify-content: space-between;
   gap: 16px;
   padding: 14px 22px;
-  background: #ffffff;
-  border: 1px solid #eef1f6;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--fr-border);
   border-radius: 12px;
   box-shadow: 0 1px 2px rgba(23, 32, 51, 0.04);
 }
@@ -37,7 +37,7 @@
 .topbar-search input {
   width: 260px;
   border-radius: 999px;
-  background: #f4f7fb;
+  background: rgba(255,255,255,0.04);
 }
 
 .topbar-avatar {
@@ -46,15 +46,15 @@
   display: grid;
   place-items: center;
   border-radius: 10px;
-  background: #f4f7fb;
-  color: #243f95;
+  background: rgba(255,255,255,0.04);
+  color: var(--fr-accent-strong);
   font-size: 12px;
   font-weight: 700;
 }
 
 .users-card {
-  background: #ffffff;
-  border: 1px solid #eef1f6;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--fr-border);
   border-radius: 14px;
   padding: 22px 24px 18px;
   box-shadow: 0 1px 2px rgba(23, 32, 51, 0.04);
@@ -75,7 +75,7 @@
 }
 
 .card-subtitle {
-  color: #8a94a6;
+  color: var(--fr-muted);
   font-size: 13px;
 }
 
@@ -91,9 +91,9 @@
   align-items: center;
   gap: 14px;
   padding: 16px 18px;
-  border: 1px solid #eef1f6;
+  border: 1px solid var(--fr-border);
   border-radius: 12px;
-  background: #fafbfd;
+  background: rgba(255,255,255,0.04);
 }
 
 .stat-icon {
@@ -106,18 +106,18 @@
 }
 
 .stat-icon-blue {
-  background: #e8eefb;
-  color: #3559d6;
+  background: rgba(110,182,255,0.15);
+  color: var(--fr-accent);
 }
 
 .stat-icon-green {
-  background: #e7f7ef;
-  color: #1f9d6b;
+  background: rgba(110,231,183,0.12);
+  color: var(--fr-success);
 }
 
 .stat-icon-teal {
-  background: #e4f8f5;
-  color: #1bb5a3;
+  background: rgba(110,182,255,0.12);
+  color: var(--fr-accent);
 }
 
 .stat-copy {
@@ -132,7 +132,7 @@
 }
 
 .stat-label {
-  color: #8a94a6;
+  color: var(--fr-muted);
   font-size: 12px;
 }
 
@@ -150,7 +150,7 @@
 .toolbar-search input {
   width: 100%;
   border-radius: 8px;
-  background: #f9fafc;
+  background: rgba(255,255,255,0.04);
 }
 
 :host ::ng-deep .filter-select {
@@ -163,16 +163,16 @@
 }
 
 :host ::ng-deep .btn-navy.p-button {
-  background: #243f95;
-  border-color: #243f95;
+  background: var(--fr-accent-strong);
+  border-color: var(--fr-accent-strong);
   border-radius: 8px;
   font-size: 13px;
   font-weight: 600;
 }
 
 :host ::ng-deep .btn-navy.p-button:hover {
-  background: #1d3279;
-  border-color: #1d3279;
+  background: #2f6fd4;
+  border-color: #2f6fd4;
 }
 
 :host ::ng-deep .users-table table {
@@ -181,8 +181,8 @@
 }
 
 :host ::ng-deep .users-table .p-datatable-thead > tr > th {
-  background: #f7f9fc;
-  color: #98a1b3;
+  background: rgba(255,255,255,0.04);
+  color: var(--fr-muted);
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.6px;
@@ -192,13 +192,13 @@
 
 :host ::ng-deep .users-table .p-datatable-tbody > tr > td {
   border: none;
-  border-bottom: 1px solid #f0f2f7;
+  border-bottom: 1px solid var(--fr-border);
   padding: 14px 16px;
   font-size: 14px;
 }
 
 :host ::ng-deep .users-table .p-datatable-tbody > tr:hover {
-  background: #fafbfe;
+  background: rgba(255,255,255,0.04);
 }
 
 .user-cell {
@@ -213,8 +213,8 @@
   display: grid;
   place-items: center;
   border-radius: 999px;
-  background: #e8eefb;
-  color: #3559d6;
+  background: rgba(110,182,255,0.15);
+  color: var(--fr-accent);
   font-size: 11px;
   font-weight: 700;
   flex-shrink: 0;
@@ -228,11 +228,11 @@
 
 .user-name {
   font-weight: 600;
-  color: #172033;
+  color: var(--fr-text);
 }
 
 .user-email {
-  color: #8a94a6;
+  color: var(--fr-muted);
   font-size: 12px;
 }
 
@@ -246,13 +246,13 @@
 }
 
 .role-admin {
-  background: #e8eefb;
-  color: #3559d6;
+  background: rgba(110,182,255,0.15);
+  color: var(--fr-accent);
 }
 
 .role-user {
-  background: #edf4ff;
-  color: #5b7fd6;
+  background: rgba(110,182,255,0.12);
+  color: var(--fr-accent);
 }
 
 .status {
@@ -270,7 +270,7 @@
 }
 
 .status-active {
-  color: #1f9d6b;
+  color: var(--fr-success);
 }
 
 .status-active .status-dot {
@@ -286,7 +286,7 @@
 }
 
 .col-muted {
-  color: #6b7488;
+  color: var(--fr-muted);
 }
 
 .row-actions {
@@ -297,13 +297,13 @@
 
 .dialog-subtitle {
   margin: 0 0 18px;
-  color: #8a94a6;
+  color: var(--fr-muted);
   font-size: 13px;
 }
 
 .form-error {
   margin: 0 0 16px;
-  color: #d64545;
+  color: var(--fr-danger);
   font-size: 13px;
 }
 
@@ -315,7 +315,7 @@
 }
 
 .form-field label {
-  color: #98a1b3;
+  color: var(--fr-muted);
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.6px;
@@ -342,7 +342,7 @@
 
 :host ::ng-deep .form-input.p-inputtext {
   border-radius: 8px;
-  background: #f9fafc;
+  background: rgba(255,255,255,0.04);
 }
 
 :host ::ng-deep .add-user-dialog {

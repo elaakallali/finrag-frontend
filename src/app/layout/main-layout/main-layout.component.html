@@ -11,7 +11,7 @@
     </div>
 
     <!-- ========== SIDEBAR ADMIN ========== -->
-    @if (!isUserMode) {
+    @if (!isUserMode && isAdmin()) {
       <nav class="sidebar-nav">
         <a
           routerLink="/report-query"
@@ -26,7 +26,6 @@
         <a routerLink="/admin/document-history" routerLinkActive="active-link" class="nav-item">
           <i class="pi pi-file"></i>
           <span>Documents</span>
-          <span class="badge">1.2k</span>
         </a>
 
         <a routerLink="/admin/document-upload" routerLinkActive="active-link" class="nav-item">
@@ -41,7 +40,7 @@
       </nav>
 
       <div class="sidebar-footer">
-        <button type="button" class="nav-item logout-button">
+        <button type="button" class="nav-item logout-button" (click)="logout()">
           <i class="pi pi-sign-out"></i>
           <span>Logout</span>
         </button>
@@ -52,29 +51,26 @@
         </div>
 
         <div class="profile-card">
-          <div class="avatar">DA</div>
+          <div class="avatar">{{ initials() }}</div>
           <div class="profile-copy">
-            <span class="profile-name">Dhouha Admin</span>
-            <span class="profile-email">admin&#64;finrag.ai</span>
+            <span class="profile-name">{{ displayName() }}</span>
+            <span class="profile-email">{{ email() }}</span>
           </div>
-          <i class="pi pi-angle-right"></i>
         </div>
       </div>
     }
 
-    <!-- ========== SIDEBAR USER : historique des discussions ========== -->
-    <!--
-      Enchainement affichage titre :
-      1) store.conversations (signal) est rempli par load() ou refresh()
-      2) @for lit conversations() → chaque c.title vient de GET /api/conversations
-      3) apres "done" du chat, refresh() met a jour le signal → {{ c.title }} change tout seul
-    -->
+    <!-- ========== SIDEBAR USER ========== -->
     @if (isUserMode) {
       <div class="user-history">
         <button type="button" class="new-chat-btn" (click)="createConversation()">
           <i class="pi pi-plus"></i>
           <span>Nouvelle discussion</span>
         </button>
+
+        @if (loadError(); as err) {
+          <p class="conv-error">{{ err }}</p>
+        }
 
         <ul class="conv-list">
           @for (c of conversations(); track c.id) {
@@ -83,27 +79,42 @@
               [class.active]="c.id === currentConversationId()"
               (click)="selectConversation(c.id)"
             >
-              <!-- Titre lu depuis le store (API), pas depuis Ollama directement -->
-              <span class="conv-title">{{ c.title }}</span>
-              <span class="conv-date">{{ c.createdAt | date:'dd/MM HH:mm' }}</span>
+              <div class="conv-main">
+                <span class="conv-title">{{ c.title }}</span>
+                <span class="conv-date">{{ c.createdAt | date:'dd/MM HH:mm' }}</span>
+              </div>
+              <button
+                type="button"
+                class="conv-delete"
+                title="Supprimer"
+                (click)="deleteConversation(c.id, $event)"
+              >
+                <i class="pi pi-trash"></i>
+              </button>
             </li>
           }
         </ul>
       </div>
 
       <div class="sidebar-footer">
-        <div class="role-switch" aria-label="Role switch">
-          <a routerLink="/report-query" class="role-option" [class.active]="!isUserMode">Admin</a>
-          <a routerLink="/user" class="role-option" [class.active]="isUserMode">User</a>
-        </div>
+        <button type="button" class="nav-item logout-button" (click)="logout()">
+          <i class="pi pi-sign-out"></i>
+          <span>Logout</span>
+        </button>
 
-        <div class="profile-card">
-          <div class="avatar">DA</div>
-          <div class="profile-copy">
-            <span class="profile-name">Dhouha Admin</span>
-            <span class="profile-email">Analyst</span>
+        @if (isAdmin()) {
+          <div class="role-switch" aria-label="Role switch">
+            <a routerLink="/report-query" class="role-option" [class.active]="!isUserMode">Admin</a>
+            <a routerLink="/user" class="role-option" [class.active]="isUserMode">User</a>
           </div>
-          <i class="pi pi-angle-right"></i>
+        }
+
+        <div class="profile-card" routerLink="/user/profile">
+          <div class="avatar">{{ initials() }}</div>
+          <div class="profile-copy">
+            <span class="profile-name">{{ displayName() }}</span>
+            <span class="profile-email">{{ email() }}</span>
+          </div>
         </div>
       </div>
     }

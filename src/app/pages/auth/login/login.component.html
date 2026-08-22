@@ -1,0 +1,95 @@
+<div class="login-page">
+  <div class="login-panel">
+    <a routerLink="/" class="back-home">← Accueil</a>
+
+    <div class="brand">
+      <div class="brand-icon">
+        <i class="pi pi-chart-bar"></i>
+      </div>
+      <div>
+        <h1>FinRAG</h1>
+        <p>AI Document Intelligence</p>
+      </div>
+    </div>
+
+    <div class="mode-switch">
+      <button
+        type="button"
+        [class.active]="mode === 'login'"
+        (click)="switchMode('login')"
+      >
+        Connexion
+      </button>
+      <button
+        type="button"
+        [class.active]="mode === 'register'"
+        (click)="switchMode('register')"
+      >
+        Inscription
+      </button>
+    </div>
+
+    <form class="login-form" novalidate (ngSubmit)="submit()">
+      @if (mode === 'register') {
+        <div class="form-row">
+          <label>
+            Prénom
+            <input
+              type="text"
+              [(ngModel)]="firstname"
+              name="firstname"
+              autocomplete="given-name"
+            />
+          </label>
+          <label>
+            Nom
+            <input
+              type="text"
+              [(ngModel)]="lastname"
+              name="lastname"
+              autocomplete="family-name"
+            />
+          </label>
+        </div>
+      }
+
+      <label>
+        Email
+        <input
+          type="email"
+          [(ngModel)]="email"
+          name="email"
+          autocomplete="username"
+          placeholder="admin@finrag.ai"
+        />
+      </label>
+
+      <label>
+        Mot de passe
+        <input
+          type="password"
+          [(ngModel)]="password"
+          name="password"
+          autocomplete="current-password"
+        />
+      </label>
+
+      @if (error(); as message) {
+        <p class="error">{{ message }}</p>
+      }
+
+      @if (success(); as message) {
+        <p class="success">{{ message }}</p>
+      }
+
+      <button type="submit" class="submit-btn" [disabled]="loading()">
+        {{ loading() ? 'Patientez…' : mode === 'login' ? 'Se connecter' : "S'inscrire" }}
+      </button>
+    </form>
+
+    <p class="hint">
+      Démo : <strong>admin&#64;finrag.ai</strong> / admin123 ·
+      <strong>user&#64;finrag.ai</strong> / user123
+    </p>
+  </div>
+</div>

@@ -1,0 +1,67 @@
+<div class="home">
+  <div class="grid-bg" aria-hidden="true"></div>
+  <div class="glow" aria-hidden="true"></div>
+
+  <header class="nav">
+    <a routerLink="/" class="brand">
+      <span class="brand-mark" aria-hidden="true">
+        <i class="pi pi-chart-bar"></i>
+      </span>
+      <span class="brand-name">FinRAG</span>
+    </a>
+
+    <nav class="nav-links">
+      <a routerLink="/" class="nav-link active" routerLinkActive="active">Accueil</a>
+      <a routerLink="/login" class="nav-link">Connexion</a>
+      <a routerLink="/login" [queryParams]="{ mode: 'register' }" class="nav-cta">Créer un compte</a>
+    </nav>
+  </header>
+
+  <main class="hero">
+    <div class="hero-copy">
+      <p class="eyebrow">
+        <span class="eyebrow-dot"></span>
+        Plateforme documentaire · RAG financier
+      </p>
+
+      <h1>
+        Vos documents financiers,<br />
+        structurés et
+        <span class="gradient-word">interrogeables.</span>
+      </h1>
+
+      <p class="lead">
+        FinRAG transforme vos textes réglementaires et documents comptables scannés
+        en une base vectorielle interrogeable — du dépôt du fichier à la réponse sourcée,
+        en quelques secondes.
+      </p>
+
+      <div class="hero-actions">
+        <a routerLink="/login" [queryParams]="{ mode: 'register' }" class="btn-primary">
+          Commencer
+        </a>
+        <a routerLink="/login" class="btn-ghost">Se connecter</a>
+      </div>
+    </div>
+
+    <div class="hero-visual" aria-hidden="true">
+      <div class="doc-card">
+        <div class="doc-lines">
+          <span></span><span></span><span></span><span></span>
+        </div>
+      </div>
+      <svg class="network" viewBox="0 0 280 320" fill="none">
+        <circle cx="210" cy="60" r="4" fill="#7ec8ff" opacity="0.9" />
+        <circle cx="250" cy="120" r="3.5" fill="#b8d4ff" opacity="0.8" />
+        <circle cx="180" cy="150" r="3" fill="#9ad0ff" opacity="0.7" />
+        <circle cx="230" cy="200" r="4" fill="#7ec8ff" opacity="0.85" />
+        <circle cx="160" cy="240" r="3" fill="#cfe3ff" opacity="0.6" />
+        <circle cx="255" cy="260" r="3.5" fill="#8ec5ff" opacity="0.75" />
+        <path d="M210 60 L250 120 L180 150 L230 200 L160 240 M250 120 L230 200 L255 260" stroke="#6aa8e8" stroke-width="1.2" opacity="0.45" />
+      </svg>
+      <div class="stack-cards">
+        <span></span><span></span><span></span>
+      </div>
+    </div>
+  </main>
+</div>

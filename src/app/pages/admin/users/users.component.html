@@ -107,8 +107,21 @@
           <td class="col-muted">{{ user.lastLogin }}</td>
           <td>
             <div class="row-actions">
-              <p-button icon="pi pi-pencil" [text]="true" [rounded]="true" severity="secondary" />
-              <p-button icon="pi pi-trash" [text]="true" [rounded]="true" severity="danger" />
+              <p-button
+                icon="pi pi-power-off"
+                [text]="true"
+                [rounded]="true"
+                severity="secondary"
+                (onClick)="toggleActive(user)"
+                [title]="user.status === 'active' ? 'Désactiver' : 'Activer'"
+              />
+              <p-button
+                icon="pi pi-trash"
+                [text]="true"
+                [rounded]="true"
+                severity="danger"
+                (onClick)="deleteUser(user)"
+              />
             </div>
           </td>
         </tr>
@@ -132,16 +145,27 @@
     <p class="form-error">{{ error }}</p>
   }
 
-  <div class="form-field">
-    <label for="user-name">FULL NAME *</label>
-    <input
-      id="user-name"
-      type="text"
-      pInputText
-      [(ngModel)]="newUserName"
-      placeholder="e.g. John Doe"
-      class="form-input"
-    />
+  <div class="form-row">
+    <div class="form-field">
+      <label for="user-firstname">FIRST NAME *</label>
+      <input
+        id="user-firstname"
+        type="text"
+        pInputText
+        [(ngModel)]="newUserFirstname"
+        class="form-input"
+      />
+    </div>
+    <div class="form-field">
+      <label for="user-lastname">LAST NAME *</label>
+      <input
+        id="user-lastname"
+        type="text"
+        pInputText
+        [(ngModel)]="newUserLastname"
+        class="form-input"
+      />
+    </div>
   </div>
 
   <div class="form-field">
@@ -152,6 +176,18 @@
       pInputText
       [(ngModel)]="newUserEmail"
       placeholder="e.g. john.doe@talan.com"
+      class="form-input"
+    />
+  </div>
+
+  <div class="form-field">
+    <label for="user-password">PASSWORD *</label>
+    <input
+      id="user-password"
+      type="password"
+      pInputText
+      [(ngModel)]="newUserPassword"
+      placeholder="Min. 6 characters"
       class="form-input"
     />
   </div>
@@ -184,6 +220,12 @@
 
   <ng-template pTemplate="footer">
     <p-button label="Cancel" severity="secondary" [text]="true" (onClick)="closeAddUserDialog()" />
-    <p-button label="Add user" icon="pi pi-user-plus" styleClass="btn-navy" (onClick)="submitAddUser()" />
+    <p-button
+      label="Add user"
+      icon="pi pi-user-plus"
+      styleClass="btn-navy"
+      [loading]="loading()"
+      (onClick)="submitAddUser()"
+    />
   </ng-template>
 </p-dialog>

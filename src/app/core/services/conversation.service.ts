@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { Conversation, ConversationMessage } from '../../models/conversation.model';
 import { IngestionResponse, RagQueryResponse, ReportSource } from '../../models/chat.model';
+import { AuthService } from './auth.service';
 
 /** Evenement SSE envoye par le backend (ChatStreamEvent Java). */
 export interface ChatStreamEvent {
@@ -15,6 +16,7 @@ export interface ChatStreamEvent {
 @Injectable({ providedIn: 'root' })
 export class ConversationService {
   private readonly http = inject(HttpClient);
+  private readonly auth = inject(AuthService);
   private readonly baseUrl = `${environment.apiUrl}/conversations`;
 
   create(title?: string): Observable<Conversation> {
@@ -54,10 +56,15 @@ export class ConversationService {
         `?question=${encodeURIComponent(question)}`;
 
       const controller = new AbortController();
+      const headers: Record<string, string> = { Accept: 'text/event-stream' };
+      const token = this.auth.getToken();
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
 
       fetch(url, {
         method: 'POST',
-        headers: { Accept: 'text/event-stream' },
+        headers,
         signal: controller.signal
       })
         .then(async (response) => {
@@ -125,5 +132,9 @@ export class ConversationService {
     formData.append('file', file);
     formData.append('strategy', 'TABLE_AWARE');
     return this.http.post<IngestionResponse>(`${this.baseUrl}/${conversationId}/upload`, formData);
+  }
+
+  delete(conversationId: string): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/${conversationId}`);
   }
 }

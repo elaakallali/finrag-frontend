@@ -1,7 +1,7 @@
 :host {
   display: block;
-  font-family: "Inter", "Segoe UI", Arial, sans-serif;
-  color: #172033;
+  font-family: var(--fr-font);
+  color: var(--fr-text);
 }
 
 .dashboard-page {
@@ -16,8 +16,8 @@
   justify-content: space-between;
   gap: 16px;
   padding: 14px 22px;
-  background: #ffffff;
-  border: 1px solid #eef1f6;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--fr-border);
   border-radius: 12px;
   box-shadow: 0 1px 2px rgba(23, 32, 51, 0.04);
 }
@@ -37,7 +37,7 @@
 .topbar-search input {
   width: 260px;
   border-radius: 999px;
-  background: #f4f7fb;
+  background: rgba(255,255,255,0.04);
 }
 
 .topbar-avatar {
@@ -46,29 +46,29 @@
   display: grid;
   place-items: center;
   border-radius: 10px;
-  background: #f4f7fb;
-  color: #243f95;
+  background: rgba(255,255,255,0.04);
+  color: var(--fr-accent-strong);
   font-size: 12px;
   font-weight: 700;
 }
 
 :host ::ng-deep .btn-navy.p-button {
-  background: #243f95;
-  border-color: #243f95;
+  background: var(--fr-accent-strong);
+  border-color: var(--fr-accent-strong);
   border-radius: 8px;
   font-size: 13px;
   font-weight: 600;
 }
 
 :host ::ng-deep .btn-navy.p-button:hover {
-  background: #1d3279;
-  border-color: #1d3279;
+  background: #2f6fd4;
+  border-color: #2f6fd4;
 }
 
 .overview-card,
 .panel-card {
-  background: #ffffff;
-  border: 1px solid #eef1f6;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--fr-border);
   border-radius: 14px;
   box-shadow: 0 1px 2px rgba(23, 32, 51, 0.04);
 }
@@ -86,7 +86,7 @@
 }
 
 .last-updated {
-  color: #8a94a6;
+  color: var(--fr-muted);
   font-size: 13px;
 }
 
@@ -110,9 +110,9 @@
   gap: 12px;
   min-height: 132px;
   padding: 16px;
-  border: 1px solid #eef1f6;
+  border: 1px solid var(--fr-border);
   border-radius: 12px;
-  background: #fafbfd;
+  background: rgba(255,255,255,0.04);
 }
 
 .metric-icon {
@@ -125,18 +125,18 @@
 }
 
 .metric-icon-blue {
-  background: #e8eefb;
-  color: #3559d6;
+  background: rgba(110,182,255,0.15);
+  color: var(--fr-accent);
 }
 
 .metric-icon-navy {
   background: #e8edf8;
-  color: #243f95;
+  color: var(--fr-accent-strong);
 }
 
 .metric-icon-teal {
-  background: #e4f8f5;
-  color: #1bb5a3;
+  background: rgba(110,182,255,0.12);
+  color: var(--fr-accent);
 }
 
 .metric-icon-purple {
@@ -145,12 +145,12 @@
 }
 
 .metric-icon-green {
-  background: #e7f7ef;
-  color: #1f9d6b;
+  background: rgba(110,231,183,0.12);
+  color: var(--fr-success);
 }
 
 .metric-icon-orange {
-  background: #fff3e8;
+  background: rgba(255, 170, 80, 0.12);
   color: #d9822b;
 }
 
@@ -160,7 +160,7 @@
 }
 
 .metric-label {
-  color: #8a94a6;
+  color: var(--fr-muted);
   font-size: 12px;
 }
 
@@ -174,16 +174,32 @@
   font-size: 11px;
 }
 
+.dashboard-loading,
+.dashboard-error,
+.panel-empty {
+  margin: 8px 0 0;
+  color: var(--fr-muted);
+  font-size: 14px;
+}
+
+.dashboard-error {
+  color: #ff6b7a;
+}
+
 .trend-up {
-  color: #1f9d6b;
+  color: var(--fr-success);
+}
+
+.trend-down {
+  color: #ff6b7a;
 }
 
 .trend-sync {
-  color: #1f9d6b;
+  color: var(--fr-success);
 }
 
 .trend-file {
-  color: #8a94a6;
+  color: var(--fr-muted);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -215,12 +231,12 @@
 
 .panel-header p {
   margin: 0;
-  color: #8a94a6;
+  color: var(--fr-muted);
   font-size: 12px;
 }
 
 .panel-year {
-  color: #8a94a6;
+  color: var(--fr-muted);
   font-size: 12px;
   font-weight: 600;
 }
@@ -261,7 +277,7 @@
 }
 
 .donut-label {
-  color: #8a94a6;
+  color: var(--fr-muted);
   font-size: 11px;
 }
 
@@ -276,12 +292,12 @@
   grid-template-columns: 10px 1fr auto;
   align-items: center;
   gap: 8px;
-  color: #6b7488;
+  color: var(--fr-muted);
   font-size: 13px;
 }
 
 .legend-item strong {
-  color: #172033;
+  color: var(--fr-text);
   font-size: 14px;
 }
 
@@ -292,7 +308,7 @@
 }
 
 .legend-navy {
-  background: #243f95;
+  background: var(--fr-accent-strong);
 }
 
 .legend-teal {
@@ -326,11 +342,15 @@
 }
 
 .tone-primary {
-  background: #243f95;
+  background: var(--fr-accent-strong);
 }
 
 .tone-teal {
   background: #1dd7c0;
+}
+
+.tone-danger {
+  background: #ff6b7a;
 }
 
 .activity-copy {
@@ -345,13 +365,13 @@
 }
 
 .activity-title em {
-  color: #8a94a6;
+  color: var(--fr-muted);
   font-style: normal;
   font-weight: 500;
 }
 
 .activity-time {
-  color: #8a94a6;
+  color: var(--fr-muted);
   font-size: 12px;
 }
 

@@ -75,7 +75,7 @@
       <p-button
         label="Send"
         icon="pi pi-send"
-        [disabled]="!question.trim() || isAsking || !currentConversationId"
+        [disabled]="!question.trim() || isAsking"
         (onClick)="send()" />
     </div>
   </footer>

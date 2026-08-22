@@ -1,7 +1,7 @@
 :host {
   display: block;
-  font-family: "Inter", "Segoe UI", Arial, sans-serif;
-  color: #172033;
+  font-family: var(--fr-font);
+  color: var(--fr-text);
 }
 
 .documents-page {
@@ -14,8 +14,8 @@
   margin: 0;
   padding: 10px 14px;
   border-radius: 8px;
-  background: #fdecec;
-  color: #d64545;
+  background: rgba(255,80,80,0.14);
+  color: var(--fr-danger);
   font-size: 13px;
 }
 
@@ -26,8 +26,8 @@
   justify-content: space-between;
   gap: 16px;
   padding: 14px 22px;
-  background: #ffffff;
-  border: 1px solid #eef1f6;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--fr-border);
   border-radius: 12px;
   box-shadow: 0 1px 2px rgba(23, 32, 51, 0.04);
 }
@@ -47,7 +47,7 @@
 .topbar-search input {
   width: 260px;
   border-radius: 999px;
-  background: #f4f7fb;
+  background: rgba(255,255,255,0.04);
 }
 
 .topbar-avatar {
@@ -56,16 +56,16 @@
   display: grid;
   place-items: center;
   border-radius: 10px;
-  background: #f4f7fb;
-  color: #243f95;
+  background: rgba(255,255,255,0.04);
+  color: var(--fr-accent-strong);
   font-size: 12px;
   font-weight: 700;
 }
 
 /* ===== Card ===== */
 .documents-card {
-  background: #ffffff;
-  border: 1px solid #eef1f6;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--fr-border);
   border-radius: 14px;
   padding: 22px 24px 18px;
   box-shadow: 0 1px 2px rgba(23, 32, 51, 0.04);
@@ -93,12 +93,12 @@
 }
 
 .form-error {
-  color: #d64545;
+  color: var(--fr-danger);
 }
 
 .loading-message,
 .empty-message {
-  color: #8a94a6;
+  color: var(--fr-muted);
 }
 
 .card-heading h2 {
@@ -108,7 +108,7 @@
 }
 
 .card-subtitle {
-  color: #8a94a6;
+  color: var(--fr-muted);
   font-size: 13px;
 }
 
@@ -127,21 +127,21 @@
 .toolbar-search input {
   width: 100%;
   border-radius: 8px;
-  background: #f9fafc;
+  background: rgba(255,255,255,0.04);
 }
 
 /* ===== Navy primary buttons ===== */
 :host ::ng-deep .btn-navy.p-button {
-  background: #243f95;
-  border-color: #243f95;
+  background: var(--fr-accent-strong);
+  border-color: var(--fr-accent-strong);
   border-radius: 8px;
   font-size: 13px;
   font-weight: 600;
 }
 
 :host ::ng-deep .btn-navy.p-button:hover {
-  background: #1d3279;
-  border-color: #1d3279;
+  background: #2f6fd4;
+  border-color: #2f6fd4;
 }
 
 /* ===== Table ===== */
@@ -151,8 +151,8 @@
 }
 
 :host ::ng-deep .documents-table .p-datatable-thead > tr > th {
-  background: #f7f9fc;
-  color: #98a1b3;
+  background: rgba(255,255,255,0.04);
+  color: var(--fr-muted);
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.6px;
@@ -162,13 +162,13 @@
 
 :host ::ng-deep .documents-table .p-datatable-tbody > tr > td {
   border: none;
-  border-bottom: 1px solid #f0f2f7;
+  border-bottom: 1px solid var(--fr-border);
   padding: 14px 16px;
   font-size: 14px;
 }
 
 :host ::ng-deep .documents-table .p-datatable-tbody > tr:hover {
-  background: #fafbfe;
+  background: rgba(255,255,255,0.04);
 }
 
 .col-name {
@@ -176,11 +176,11 @@
   align-items: center;
   gap: 10px;
   font-weight: 500;
-  color: #243f95;
+  color: var(--fr-accent-strong);
 }
 
 .col-name i {
-  color: #e15b5b;
+  color: var(--fr-danger);
   font-size: 15px;
 }
 
@@ -190,7 +190,7 @@
   padding: 0;
   font: inherit;
   font-weight: 500;
-  color: #243f95;
+  color: var(--fr-accent-strong);
   cursor: pointer;
   text-align: left;
 }
@@ -200,11 +200,11 @@
 }
 
 .col-muted {
-  color: #6b7488;
+  color: var(--fr-muted);
 }
 
 .type-link {
-  color: #3559d6;
+  color: var(--fr-accent);
   font-size: 13px;
   font-weight: 500;
 }
@@ -225,7 +225,7 @@
 }
 
 .status-indexed {
-  color: #1f9d6b;
+  color: var(--fr-success);
 }
 .status-indexed .status-dot {
   background: #21c17a;
@@ -239,7 +239,7 @@
 }
 
 .status-failed {
-  color: #d64545;
+  color: var(--fr-danger);
 }
 .status-failed .status-dot {
   background: #e25555;
@@ -262,7 +262,7 @@
 }
 
 .footer-count {
-  color: #8a94a6;
+  color: var(--fr-muted);
   font-size: 13px;
 }
 
@@ -278,7 +278,7 @@
   gap: 6px;
   border: 1px solid #e6e9f0;
   border-radius: 8px;
-  background: #ffffff;
+  background: rgba(255,255,255,0.05);
   color: #5a6478;
   font-size: 13px;
   padding: 7px 12px;
@@ -286,7 +286,7 @@
 }
 
 .page-btn:hover {
-  background: #f4f7fb;
+  background: rgba(255,255,255,0.04);
 }
 
 .page-num {
@@ -296,9 +296,9 @@
 }
 
 .page-num.active {
-  background: #243f95;
-  border-color: #243f95;
-  color: #ffffff;
+  background: var(--fr-accent-strong);
+  border-color: var(--fr-accent-strong);
+  color: rgba(255,255,255,0.05);
 }
 
 @media (max-width: 900px) {

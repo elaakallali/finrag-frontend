@@ -100,19 +100,26 @@ export class UserChatComponent implements OnInit, OnDestroy {
 
   send(): void {
     const text = this.question.trim();
-    if (!text || this.isAsking || !this.currentConversationId) {
+    if (!text || this.isAsking) {
       return;
     }
 
     this.messages.push({ role: 'user', text, time: this.time() });
     this.question = '';
 
-    if (this.isUploading) {
-      this.pendingQuestion = text;
-      return;
-    }
-
-    this.askQuestion(text);
+    void this.conversationStore.ensureCurrentConversation().then((conversationId) => {
+      if (this.isUploading) {
+        this.pendingQuestion = text;
+        return;
+      }
+      this.askQuestion(text, conversationId);
+    }).catch(() => {
+      this.messages.push({
+        role: 'assistant',
+        text: 'Erreur : aucune discussion active. Réessayez ou créez une nouvelle discussion.',
+        time: this.time()
+      });
+    });
   }
 
   onUpload(event: { files: File[] }): void {
@@ -165,7 +172,10 @@ export class UserChatComponent implements OnInit, OnDestroy {
           if (this.pendingQuestion) {
             const text = this.pendingQuestion;
             this.pendingQuestion = null;
-            this.askQuestion(text);
+            const id = this.currentConversationId;
+            if (id) {
+              this.askQuestion(text, id);
+            }
           }
         }
 
@@ -205,8 +215,9 @@ export class UserChatComponent implements OnInit, OnDestroy {
     this.askSub = null;
   }
 
-  private askQuestion(text: string): void {
-    if (!this.currentConversationId) {
+  private askQuestion(text: string, conversationId?: string): void {
+    const id = conversationId ?? this.currentConversationId;
+    if (!id) {
       return;
     }
 
@@ -221,7 +232,7 @@ export class UserChatComponent implements OnInit, OnDestroy {
       sources: []
     });
 
-    this.askSub = this.conversationService.askStream(this.currentConversationId, text).subscribe({
+    this.askSub = this.conversationService.askStream(id, text).subscribe({
       next: (event) => {
         const current = this.messages[assistantIndex];
         if (!current) {
@@ -244,10 +255,6 @@ export class UserChatComponent implements OnInit, OnDestroy {
           this.isAsking = false;
         }
 
-        // Fin du stream SSE :
-        // 1) backend a deja sauve ASSISTANT + eventuel titre Ollama en base
-        // 2) refresh() → GET /conversations → signal conversations mis a jour
-        // 3) sidebar (MainLayout) re-affiche {{ c.title }} automatiquement
         if (event.type === 'done') {
           this.isAsking = false;
           this.conversationStore.refresh();
